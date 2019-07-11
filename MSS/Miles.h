@@ -14,7 +14,7 @@ extern "C" __declspec(dllimport) __int64 MilesBankLoad(__int64 a1, const char *a
 extern "C" __declspec(dllimport) __int64 MilesBankGetStatus(__int64 a1, int *a2);
 extern "C" __declspec(dllimport) char* MilesBankStatusToString(__int64 a1);
 extern "C" __declspec(dllimport) __int64 MilesBankPatch(__int64 a1, const char *a2, const char *a3);
-extern "C" __declspec(dllimport) __int64 MilesProjectGetBus(__int64 a1, const char *a2);
+extern "C" __declspec(dllimport) __int64* MilesProjectGetBus(__int64 a1, const char *a2);
 extern "C" __declspec(dllimport) __int64* MilesSampleCreate(__int64 a1, __int64 a2, __int64 a3);
 extern "C" __declspec(dllimport) void MilesSamplePlay(__int64* a1);
 extern "C" __declspec(dllimport) bool MilesSampleSetSourceRaw(__int64* sample, __int64 a2, __int64 a3, __int64 a4, __int16 a5);
@@ -38,7 +38,7 @@ extern "C" __declspec(dllimport) __int64 MilesEventInfoQueueEnable(__int64 a1);
 extern "C" __declspec(dllimport) __int64 MilesEventSetStreamingCacheLimit(__int64, __int64);
 extern "C" __declspec(dllimport) __int64 MilesEventControllerNames(__int64, __int64, __int64*, unsigned int);
 extern "C" __declspec(dllimport) __m128  MilesBusGetVolumeLevel(__int64 a1);
-extern "C" __declspec(dllimport) __int64 MilesBusSetVolumeLevel(__int64 a1, float a2);
+extern "C" __declspec(dllimport) __int64 MilesBusSetVolumeLevel(__int64* a1, float a2);
 extern "C" __declspec(dllimport) __int64 MilesQueueControllerValue(__int64 a1, const char* a2, float a3);
 extern "C" __declspec(dllimport) __int64 MilesQueueEventInfoMask(__int64 a1, int a2);
 extern "C" __declspec(dllimport) __int64 MilesQueueEventControllerValue(__int64 a1, const char* a2, float a3);
@@ -48,3 +48,12 @@ extern "C" __declspec(dllimport)    void MilesFillWavHeader(__int64 OUT_BUFFER, 
 
 // imported from abinkwin64
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(__int64 a);
+
+// Helpers
+void SetupBusVolumes(__int64 driver)
+{
+	/*MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Master"), 1);
+	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Voice_Comm_bus"), 1);
+	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "SFX_ui"), 1);
+	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "SFX"), 1);*/
+}
