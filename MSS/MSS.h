@@ -6,5 +6,4 @@ void dump_data();
 __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1);
 int main();
 
-typedef __int64* Driver;
-typedef __int64* Bank;
+

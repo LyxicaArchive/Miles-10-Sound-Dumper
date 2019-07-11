@@ -1,6 +1,8 @@
 #pragma once
 #include <Windows.h>
 #include <xmmintrin.h>
+typedef __int64* Driver;
+typedef __int64* Bank;
 
 // imported from miles
 extern "C" __declspec(dllimport) int MilesStartup(void (WINAPI *logger)(int a, char *b));
