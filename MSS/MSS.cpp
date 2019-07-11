@@ -9,7 +9,10 @@
 #include <miles_header.h>
 #include <vector>
 #include <iomanip>
-using namespace std;
+#include <Timeapi.h>
+#include "MSS.h"
+
+constexpr unsigned int sound_data_size = 1024 * 1024 * 100; // 100 MB
 const char* names[] = {
 	"general",
 	"1PTailFilter",
@@ -587,10 +590,94 @@ struct unk {
 	WORD field1A = 0;
 	__int64 hrtf_buffer = 0; // Pointer to HRTF Data
 };
+byte* sound_data = (byte*) malloc(sound_data_size);
+unsigned int sound_data_cursor = 0;
+byte* buffer_addr;
+int write_size;
+__int64 (*original_GET_AUDIO_BUFFER_AND_SET_SIZE)(__int64*, byte**, int);
+__int64 (*original_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER)(__int64*);
+__int64 (*REFRESH_DSBUFFERS)(__int64*, int);
+
+
+__int64 hook_REFRESH_DSBUFFERS(__int64* a, int b) {
+	auto return_val = REFRESH_DSBUFFERS(a, b);
+	hook_directsoundcom((byte*)a);
+	std::cout << "updated hooks" << std::endl;
+	return return_val;
+}
+
+void hook_directsoundcom(byte* DIRECTSOUNDCOM) {
+	__int64* addr = *(long long**)(DIRECTSOUNDCOM + 0x30);
+	original_GET_AUDIO_BUFFER_AND_SET_SIZE = (__int64 (*)(__int64*, byte * *, int))addr;
+
+	addr = *(long long**)(DIRECTSOUNDCOM + 0x38);
+	original_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER = *(__int64 (*)(__int64*))addr;
+
+	addr = *(long long**)(DIRECTSOUNDCOM + 0x20);
+	REFRESH_DSBUFFERS = *(__int64 (*)(__int64*, int))addr;
+
+	*(long long**)(DIRECTSOUNDCOM + 0x20) = (long long*)& hook_REFRESH_DSBUFFERS;
+	*(long long**)(DIRECTSOUNDCOM + 0x30) = (long long*)& hook_GET_AUDIO_BUFFER_AND_SET_SIZE;
+	*(long long**)(DIRECTSOUNDCOM + 0x38) = (long long*)& hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER;
+}
+
+__int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size) {
+	write_size = size;
+	auto return_val = original_GET_AUDIO_BUFFER_AND_SET_SIZE(a1, BUFFER, size);
+	buffer_addr = *BUFFER;
+	return return_val;
+}
+
+bool valid_data(byte* buffer, int size) {
+	for (int i = 0; i < size; i++) {
+		if (buffer[i] != 0) { return true; }
+	}
+
+	return false;
+}
+void dump_data() {
+	byte header[44];
+	MilesFillWavHeader((long long)&header, 48000, 2, sound_data_cursor);
+
+	FILE* file;
+	fopen_s(&file, "test13.wav", "wb");
+	fwrite(header, 1, 44, file);
+	fwrite(sound_data, 1, sound_data_cursor, file);
+	fclose(file);
+	sound_data_cursor = 0;
+}
+int empty_count = 0;
+__int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
+	if (valid_data(buffer_addr, write_size)) {
+		memcpy(sound_data + sound_data_cursor, buffer_addr, write_size);
+		sound_data_cursor += write_size;
+	}
+	else if (sound_data_cursor > 0) {
+		if (empty_count == 100) {
+			empty_count = 0;
+			dump_data();
+		}
+		else {
+			empty_count += 1;
+		}
+		dump_data();
+	}
+
+	return original_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(a1);
+}
+
+
+void setuphooks(__int64* driver) {
+	byte* DS_CONTAINER = (byte*)driver + 0x28;
+	byte* DIRECTSOUNDCOM = (byte*) *(__int64**)(DS_CONTAINER + 0x20);
+
+	hook_directsoundcom(DIRECTSOUNDCOM);
+}
+
 
 void WINAPI logM(int number, char* message)
 {
-	cout << "Message received: " << message << "\r\n";
+	std::cout << "Message received: " << message << "\r\n";
 }
 
 void print_bus_volumes(__int64 driver) {
@@ -598,7 +685,7 @@ void print_bus_volumes(__int64 driver) {
 		__int64 test = MilesProjectGetBus(driver, names[i]);
 		if (test) {
 			auto vol = MilesBusGetVolumeLevel(test);
-			cout << "BANK:" << names[i] << " = " << std::setprecision(16) << vol.m128_f32[0] << std::endl;
+			std::cout << "BANK:" << names[i] << " = " << std::setprecision(16) << vol.m128_f32[0] << std::endl;
 		}
 	}
 }
@@ -613,7 +700,7 @@ void full_all_buses(__int64 driver) {
 }
 
 void print_source_names(__int64 bank) {
-	ofstream file;
+	std::ofstream file;
 	file.open("source_names.txt");
 	auto srcCount = MilesBankGetSourceCount(bank);
 	//cout << "MilesBankGetSourceCount: " << srcCount << std::endl;
@@ -633,8 +720,8 @@ int main()
 	MilesSetStartupParameters(&startup_parameters);
 	MilesAllocTrack(2);
 	__int64 startup = MilesStartup(&logM);
-	cout << "Start up: " << startup << "\r\n";
-
+	std::cout << "Start up: " << startup << "\r\n";
+	std::cout << "Buffer ptr " << std::hex << &buffer_addr << std::endl;
 
 	auto output = MilesOutputDirectSound();
 	unk a1;
@@ -649,6 +736,7 @@ int main()
 	MilesDriverSetMasterVolume(driver, 0.5);
 	auto queue = MilesQueueCreate(driver);
 	MilesEventInfoQueueEnable(driver);
+	setuphooks((long long *)driver);
 
 	__int64 project_load = MilesProjectLoad(driver, "D:\\Miles SS10\\apex data - april 9\\audio.mprj", "english", "audio");
 
@@ -658,7 +746,7 @@ int main()
 		status = MilesProjectGetStatus(driver);
 	}
 	status = MilesProjectGetStatus(driver);
-	cout << "status: " << MilesProjectStatusToString(status) << endl;
+	std::cout << "status: " << MilesProjectStatusToString(status) << std::endl;
 
 	__int64 bank = MilesBankLoad(driver, "D:\\Miles SS10\\apex data - april 9\\general.mbnk", "D:\\Miles SS10\\apex data - april 9\\general_stream.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english.mstr", 0); // 136 MB data
 	MilesBankPatch(bank, "D:\\Miles SS10\\apex data - april 9\\general_stream_patch_1.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english_patch_1.mstr");
@@ -668,7 +756,7 @@ int main()
 	while (bank_status == 0) {
 		bank_status = MilesBankGetStatus(bank, &bs_ptr);
 	}
-	cout << "bank_status: " << MilesBankStatusToString(bank_status) << endl;
+	std::cout << "bank_status: " << MilesBankStatusToString(bank_status) << std::endl;
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//print_bus_volumes(driver); 
 
@@ -702,11 +790,11 @@ int main()
 	} out;
 	while (true) {
 
-		cout << "n: ";
-		cin >> i;
+		std::cout << "n: ";
+		std::cin >> i;
 
 		if (i >= events) {
-			cout << "invalid" << std::endl;
+			std::cout << "invalid" << std::endl;
 			continue;
 		}
 
@@ -726,9 +814,12 @@ int main()
 			MilesQueueSubmit(queue);
 			continue;
 		}
+		if (i == -4) {
+			continue;
+		}
 
 		auto meh = MilesBankGetEventName(bank, i);
-		cout << meh << std::endl;
+		std::cout << meh << std::endl;
 
 
 		MilesBankGetEventTemplateId(bank, i, (long long*)& out);
@@ -761,7 +852,7 @@ int main()
 	
 	//delete[] buffer;
 	
-	cin >> i;
+	std::cin >> i;
 	return 0;
 }
 

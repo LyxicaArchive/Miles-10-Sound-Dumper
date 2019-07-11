@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <xmmintrin.h>
 
+// imported from miles
 extern "C" __declspec(dllimport) int MilesStartup(void (WINAPI *logger)(int a, char *b));
 extern "C" __declspec(dllimport) int MilesIntAuditionReport(const char *msg);
 extern "C" __declspec(dllimport) __int64 MilesDriverCreate(__int64 *output);
@@ -43,7 +44,7 @@ extern "C" __declspec(dllimport) __int64 MilesQueueEventInfoMask(__int64 a1, int
 extern "C" __declspec(dllimport) __int64 MilesQueueEventControllerValue(__int64 a1, const char* a2, float a3);
 extern "C" __declspec(dllimport) __int64 MilesBankGetSourceTemplateId(__int64, int, __int64*);
 extern "C" __declspec(dllimport) __int64 MilesQueueEvent3DPosition(__int64 a1, float a2, float a3, float a4);
-//extern "C" __declspec(dllimport) __int64 MilesBankGetEventCount(__int64);
-//extern "C" __declspec(dllimport) char* MilesProjectGetBankName(__int64, int);
+extern "C" __declspec(dllimport)    void MilesFillWavHeader(__int64 OUT_BUFFER, int sampleRateHz, unsigned __int16 channels, int size);
 
+// imported from abinkwin64
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(__int64 a);
