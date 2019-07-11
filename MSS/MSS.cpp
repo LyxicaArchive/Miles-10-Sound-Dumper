@@ -17,12 +17,12 @@ constexpr unsigned int sound_data_size = 1024 * 1024 * 100; // 100 MB
 
 struct unk {
 	__int64* sound_function = 0; 
-	LPCWSTR* endpointID = 0; // Used inside MilesDriverCreate when calling CreateDirectSound
+	LPCWSTR* endpointID = 0;
 	INT32 channel_count = 0;
 	INT32 maybe_sample_rate = 0;
 	WORD field18 = 0;
 	WORD field1A = 0;
-	__int64 hrtf_buffer = 0; // Pointer to HRTF Data
+	__int64 hrtf_buffer = 0;
 };
 byte* sound_data = (byte*) malloc(sound_data_size);
 unsigned int sound_data_cursor = 0;
@@ -93,7 +93,6 @@ int main()
 	auto output = MilesOutputDirectSound();
 	unk a1;
 	a1.sound_function = (long long*)output;
-	//a1.endpointID = new LPCWSTR(L"{0.0.0.00000000}.{9b88f291-a276-47ad-8a75-28fbc49360e9}");
 	a1.endpointID = NULL; // Default audio Device 
 	a1.maybe_sample_rate = 48000;
 	a1.channel_count = 2;
@@ -107,7 +106,7 @@ int main()
 
 	__int64 project_load = MilesProjectLoad(driver, "D:\\Miles SS10\\apex data - april 9\\audio.mprj", "english", "audio");
 
-	__int64 status = MilesProjectGetStatus(driver); //5 MB of data - entire file is loaded
+	__int64 status = MilesProjectGetStatus(driver);
 	while (status == 0) {
 		Sleep(500);
 		status = MilesProjectGetStatus(driver);
@@ -124,38 +123,12 @@ int main()
 		bank_status = MilesBankGetStatus(bank, &bs_ptr);
 	}
 	std::cout << "bank_status: " << MilesBankStatusToString(bank_status) << std::endl;
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//print_bus_volumes(driver); 
-
-	//MilesBusSetVolumeLevel(bus, 1);
-	//MilesBusGetVolumeLevel(bus);
-
-
-	/* Needed to be *. Miles returns a pointer which is an integer, shouldn't that be fine? */
-	
-	//__int64 *sample = MilesSampleCreate(driver, bus, 0); // target 
-
-	/*FILE* handle;
-	fopen_s(&handle, "D:\\Miles SS10\\apex data - april 9\\general_stream.mstr", "r");
-	fseek(handle, 0, SEEK_END);
-	long size = ftell(handle);
-	fseek(handle, 0, SEEK_SET);
-	auto buffer = new char[size];
-	fread(buffer, 1, size, handle);
-	fclose(handle);*/
 
 	auto events = MilesBankGetEventCount(bank);
-	/*cout << "events: " << events << std::endl;
-	for (int i = 0; i < 0x100; i++) {
-		auto meh = MilesBankGetEventName(bank, i);
-		cout << i << " " << meh << std::endl;
-	}*/
-	//MilesBusGetVolumeLevel(bus);
 	struct {
 		int fielda;
 		int fieldb;
 	} out;
-	//SetupBusVolumes(driver);
 	while (true) {
 
 		std::cout << "n: ";
@@ -180,34 +153,10 @@ int main()
 		MilesQueueEventVolume(queue, 1);
 		MilesQueueControllerValue(queue, "GameMusicVolume", 1);
 		MilesQueueControllerValue(queue, "DialogueVolume", 1);
-		/*MilesQueueControllerValue(queue, "GameMusicVolume", 1);
-		MilesQueueControllerValue(queue, "LobbyMusicVolume", 1);
-		MilesQueueControllerValue(queue, "DialogueVolume", 1);
-		MilesQueueControllerValue(queue, "SfxVolume", 1);
-		MilesQueueControllerValue(queue, "VoiceCommVolume", 1);
-		MilesQueueControllerValue(queue, "1PTailVolume", 1);*/
-		/*MilesQueueEventControllerValue(queue, "GameMusicVolume", 1);
-		MilesQueueEventControllerValue(queue, "LobbyMusicVolume", 1);
-		MilesQueueEventControllerValue(queue, "SoundscapeFloor", 0);
-		MilesQueueEventControllerValue(queue, "ListenerSoundscapeRoof", 0);
-		MilesQueueEventInfoMask(queue, 1);*/
 		MilesQueueEventRunByTemplateId(queue, (int*)& out);
-		//MilesQueueEvent3DPosition(queue, 50000, 500, 0.2);
 		MilesQueueSubmit(queue);
-
-		//MilesQueueEventFilterId(queue, 0x3);
-		//MilesQueueEventRun(queue, "RESUME"); // RESUME, STOP, STOPNOW
 	}
-	
-
-	//bool set_sample_result = MilesSampleSetSourceRaw(sample, (long long)buffer+0x20, 0, 0x2B11LL, 1); // target
-	/*bool set_sample_result = MilesSampleSetSource(sample, (long long)buffer + 0x20, 0x69, 2); // target
-	cout << "set sample result: " << set_sample_result << endl;
-	MilesSamplePlay(sample); // target*/
-
-	
-	//delete[] buffer;
-	
+		
 	std::cin >> i;
 	return 0;
 }
