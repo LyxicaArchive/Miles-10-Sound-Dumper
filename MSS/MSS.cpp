@@ -17,7 +17,7 @@
 Recorder* recorder = 0;
 byte* buffer_addr;
 int write_size;
-bool receivedFirstSample = false;
+DWORD timeLastRecvFrame; // Timestamp of the last received audio buffer frame that contains audio (ie not full of 0s)
 
 __int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size) {
 	write_size = size;
@@ -34,18 +34,15 @@ bool valid_data(byte* buffer, int size) {
 	return false;
 }
 
-unsigned int iterationsSinceAppending = 0;
 __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 	if (recorder->Active()) {
-		iterationsSinceAppending += 1;
 
 		if (valid_data(buffer_addr, write_size))
 		{
-			receivedFirstSample = true;
 			recorder->Append(buffer_addr, write_size);
-			iterationsSinceAppending = 0;
+			timeLastRecvFrame = timeGetTime();
 		}
-		else if (receivedFirstSample && iterationsSinceAppending > 100)
+		else if (timeGetTime() - timeLastRecvFrame > 250) // After 250ms of silence, the sound is probably done.
 		{
 			std::cout << "Saving " << recorder->GetName() << std::endl;
 			recorder->Save();
@@ -128,8 +125,7 @@ int main()
 		}
 
 		if (recorder->Record(i)) {
-			iterationsSinceAppending = 0;
-			receivedFirstSample = false;
+			timeLastRecvFrame = timeGetTime();
 			std::cout << "Recording " << recorder->GetName() << std::endl;
 		}
 
