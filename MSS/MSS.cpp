@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <Timeapi.h>
 #include "MSS.h"
+#include "hooks.h"
 
 constexpr unsigned int sound_data_size = 1024 * 1024 * 100; // 100 MB
 const char* names[] = {
@@ -594,36 +595,10 @@ byte* sound_data = (byte*) malloc(sound_data_size);
 unsigned int sound_data_cursor = 0;
 byte* buffer_addr;
 int write_size;
-__int64 (*original_GET_AUDIO_BUFFER_AND_SET_SIZE)(__int64*, byte**, int);
-__int64 (*original_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER)(__int64*);
-__int64 (*REFRESH_DSBUFFERS)(__int64*, int);
-
-
-__int64 hook_REFRESH_DSBUFFERS(__int64* a, int b) {
-	auto return_val = REFRESH_DSBUFFERS(a, b);
-	hook_directsoundcom((byte*)a);
-	std::cout << "updated hooks" << std::endl;
-	return return_val;
-}
-
-void hook_directsoundcom(byte* DIRECTSOUNDCOM) {
-	__int64* addr = *(long long**)(DIRECTSOUNDCOM + 0x30);
-	original_GET_AUDIO_BUFFER_AND_SET_SIZE = (__int64 (*)(__int64*, byte * *, int))addr;
-
-	addr = *(long long**)(DIRECTSOUNDCOM + 0x38);
-	original_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER = *(__int64 (*)(__int64*))addr;
-
-	addr = *(long long**)(DIRECTSOUNDCOM + 0x20);
-	REFRESH_DSBUFFERS = *(__int64 (*)(__int64*, int))addr;
-
-	*(long long**)(DIRECTSOUNDCOM + 0x20) = (long long*)& hook_REFRESH_DSBUFFERS;
-	*(long long**)(DIRECTSOUNDCOM + 0x30) = (long long*)& hook_GET_AUDIO_BUFFER_AND_SET_SIZE;
-	*(long long**)(DIRECTSOUNDCOM + 0x38) = (long long*)& hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER;
-}
 
 __int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size) {
 	write_size = size;
-	auto return_val = original_GET_AUDIO_BUFFER_AND_SET_SIZE(a1, BUFFER, size);
+	auto return_val = hook1(a1, BUFFER, size);
 	buffer_addr = *BUFFER;
 	return return_val;
 }
@@ -663,16 +638,10 @@ __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 		dump_data();
 	}
 
-	return original_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(a1);
+	return hook2(a1);
 }
 
 
-void setuphooks(__int64* driver) {
-	byte* DS_CONTAINER = (byte*)driver + 0x28;
-	byte* DIRECTSOUNDCOM = (byte*) *(__int64**)(DS_CONTAINER + 0x20);
-
-	hook_directsoundcom(DIRECTSOUNDCOM);
-}
 
 
 void WINAPI logM(int number, char* message)
@@ -736,7 +705,7 @@ int main()
 	MilesDriverSetMasterVolume(driver, 0.5);
 	auto queue = MilesQueueCreate(driver);
 	MilesEventInfoQueueEnable(driver);
-	setuphooks((long long *)driver);
+	SetupHooks((PVOID)driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 
 	__int64 project_load = MilesProjectLoad(driver, "D:\\Miles SS10\\apex data - april 9\\audio.mprj", "english", "audio");
 
