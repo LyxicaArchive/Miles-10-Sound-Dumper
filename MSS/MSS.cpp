@@ -36,7 +36,7 @@ bool valid_data(byte* buffer, int size) {
 }
 void dump_data() {
 	byte header[44];
-	MilesFillWavHeader((long long)&header, 48000, 2, sound_data_cursor);
+	MilesFillWavHeader(&header, 48000, 2, sound_data_cursor);
 
 	FILE* file;
 	fopen_s(&file, "test13.wav", "wb");

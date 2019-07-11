@@ -46,7 +46,7 @@ extern "C" __declspec(dllimport) __int64 MilesQueueEventInfoMask(__int64 a1, int
 extern "C" __declspec(dllimport) __int64 MilesQueueEventControllerValue(__int64 a1, const char* a2, float a3);
 extern "C" __declspec(dllimport) __int64 MilesBankGetSourceTemplateId(__int64, int, __int64*);
 extern "C" __declspec(dllimport) __int64 MilesQueueEvent3DPosition(__int64 a1, float a2, float a3, float a4);
-extern "C" __declspec(dllimport)    void MilesFillWavHeader(__int64 OUT_BUFFER, int sampleRateHz, unsigned __int16 channels, int size);
+extern "C" __declspec(dllimport)    void MilesFillWavHeader(PVOID OUT_BUFFER, int sampleRateHz, unsigned __int16 channels, int size);
 
 // imported from abinkwin64
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(__int64 a);
