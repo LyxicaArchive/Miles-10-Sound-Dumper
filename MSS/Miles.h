@@ -12,10 +12,10 @@ extern "C" __declspec(dllimport) __int64 MilesProjectLoad(__int64 a1, const char
 extern "C" __declspec(dllimport) __int64 MilesProjectGetStatus(__int64 a1);
 extern "C" __declspec(dllimport) void MilesAllocTrack(__int64 a1);
 extern "C" __declspec(dllimport) char* MilesProjectStatusToString(__int64 a1);
-extern "C" __declspec(dllimport) __int64 MilesBankLoad(__int64 a1, const char *a2, const char *a3, const char *a4, __int64 a5);
-extern "C" __declspec(dllimport) __int64 MilesBankGetStatus(__int64 a1, int *a2);
+extern "C" __declspec(dllimport) Bank MilesBankLoad(__int64 a1, const char *a2, const char *a3, const char *a4, __int64 a5);
+extern "C" __declspec(dllimport) __int64 MilesBankGetStatus(Bank bank, int *a2);
 extern "C" __declspec(dllimport) char* MilesBankStatusToString(__int64 a1);
-extern "C" __declspec(dllimport) __int64 MilesBankPatch(__int64 a1, const char *a2, const char *a3);
+extern "C" __declspec(dllimport) __int64 MilesBankPatch(Bank bank, const char *a2, const char *a3);
 extern "C" __declspec(dllimport) __int64* MilesProjectGetBus(__int64 a1, const char *a2);
 extern "C" __declspec(dllimport) __int64* MilesSampleCreate(__int64 a1, __int64 a2, __int64 a3);
 extern "C" __declspec(dllimport) void MilesSamplePlay(__int64* a1);
@@ -24,11 +24,11 @@ extern "C" __declspec(dllimport) bool MilesSampleSetSource(__int64* sample, __in
 extern "C" __declspec(dllimport) int MilesSetStartupParameters(int *a);
 extern "C" __declspec(dllimport) __int64 (*MilesOutputDirectSound())(__int64* OUT_buffer, int, int, unsigned int, int, __int64);
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterDecoder(__int64* a1, __int64*);
-extern "C" __declspec(dllimport) __int64 MilesBankGetEventCount(__int64);
+extern "C" __declspec(dllimport) __int64 MilesBankGetEventCount(Bank bank);
 extern "C" __declspec(dllimport) __int64 MilesBankGetSourceCount(__int64);
 extern "C" __declspec(dllimport) char* MilesBankGetSourceName(__int64, int);
-extern "C" __declspec(dllimport) char* MilesBankGetEventName(__int64, int);
-extern "C" __declspec(dllimport) __int64 MilesBankGetEventTemplateId(__int64, int, __int64*);
+extern "C" __declspec(dllimport) char* MilesBankGetEventName(Bank bank, int);
+extern "C" __declspec(dllimport) __int64 MilesBankGetEventTemplateId(Bank bank, int, __int64*);
 extern "C" __declspec(dllimport) __int64 MilesQueueCreate(__int64);
 extern "C" __declspec(dllimport) __int64 MilesQueueSubmit(__int64);
 extern "C" __declspec(dllimport) __int64 MilesQueueEventRunByTemplateId(__int64, int*);

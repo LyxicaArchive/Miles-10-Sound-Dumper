@@ -96,7 +96,7 @@ int main()
 	a1.endpointID = NULL; // Default audio Device 
 	a1.maybe_sample_rate = 48000;
 	a1.channel_count = 2;
-	__int64 driver = MilesDriverCreate((long long*)&a1); // ERROR <--
+	__int64 driver = MilesDriverCreate((long long*)&a1);
 	MilesDriverRegisterBinkAudio(driver);
 	MilesEventSetStreamingCacheLimit(driver, 0x4000000);
 	MilesDriverSetMasterVolume(driver, 0.5);
@@ -114,7 +114,7 @@ int main()
 	status = MilesProjectGetStatus(driver);
 	std::cout << "status: " << MilesProjectStatusToString(status) << std::endl;
 
-	__int64 bank = MilesBankLoad(driver, "D:\\Miles SS10\\apex data - april 9\\general.mbnk", "D:\\Miles SS10\\apex data - april 9\\general_stream.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english.mstr", 0); // 136 MB data
+	Bank bank = MilesBankLoad(driver, "D:\\Miles SS10\\apex data - april 9\\general.mbnk", "D:\\Miles SS10\\apex data - april 9\\general_stream.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english.mstr", 0); // 136 MB data
 	MilesBankPatch(bank, "D:\\Miles SS10\\apex data - april 9\\general_stream_patch_1.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english_patch_1.mstr");
 
 	int bs_ptr = -1;
