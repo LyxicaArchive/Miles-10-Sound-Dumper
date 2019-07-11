@@ -36,10 +36,10 @@ bool valid_data(byte* buffer, int size) {
 
 __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 	if (recorder->Active()) {
+		recorder->Append(buffer_addr, write_size);
 
 		if (valid_data(buffer_addr, write_size))
 		{
-			recorder->Append(buffer_addr, write_size);
 			timeLastRecvFrame = timeGetTime();
 		}
 		else if (timeGetTime() - timeLastRecvFrame > 250) // After 250ms of silence, the sound is probably done.
