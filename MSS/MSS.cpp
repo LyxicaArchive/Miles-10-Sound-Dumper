@@ -12,13 +12,12 @@
 #include "Miles.h"
 #include "MSS.h"
 #include "hooks.h"
+#include "Recorder.h"
 
-constexpr unsigned int sound_data_size = 1024 * 1024 * 100; // 100 MB
-
-byte* sound_data = (byte*) malloc(sound_data_size);
-unsigned int sound_data_cursor = 0;
+Recorder* recorder = 0;
 byte* buffer_addr;
 int write_size;
+bool receivedFirstSample = false;
 
 __int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size) {
 	write_size = size;
@@ -34,32 +33,23 @@ bool valid_data(byte* buffer, int size) {
 
 	return false;
 }
-void dump_data() {
-	byte header[44];
-	MilesFillWavHeader(&header, 48000, 2, sound_data_cursor);
 
-	FILE* file;
-	fopen_s(&file, "test13.wav", "wb");
-	fwrite(header, 1, 44, file);
-	fwrite(sound_data, 1, sound_data_cursor, file);
-	fclose(file);
-	sound_data_cursor = 0;
-}
-int empty_count = 0;
+unsigned int iterationsSinceAppending = 0;
 __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
-	if (valid_data(buffer_addr, write_size)) {
-		memcpy(sound_data + sound_data_cursor, buffer_addr, write_size);
-		sound_data_cursor += write_size;
-	}
-	else if (sound_data_cursor > 0) {
-		if (empty_count == 100) {
-			empty_count = 0;
-			dump_data();
+	if (recorder->Active()) {
+		iterationsSinceAppending += 1;
+
+		if (valid_data(buffer_addr, write_size))
+		{
+			receivedFirstSample = true;
+			recorder->Append(buffer_addr, write_size);
+			iterationsSinceAppending = 0;
 		}
-		else {
-			empty_count += 1;
+		else if (receivedFirstSample && iterationsSinceAppending > 100)
+		{
+			std::cout << "Saving " << recorder->GetName() << std::endl;
+			recorder->Save();
 		}
-		dump_data();
 	}
 
 	return hook2(a1);
@@ -79,7 +69,6 @@ int main()
 	MilesAllocTrack(2);
 	__int64 startup = MilesStartup(&logM);
 	std::cout << "Start up: " << startup << "\r\n";
-	std::cout << "Buffer ptr " << std::hex << &buffer_addr << std::endl;
 
 	auto output = MilesOutputDirectSound();
 	unk a1;
@@ -93,7 +82,6 @@ int main()
 	MilesDriverSetMasterVolume(driver, 0.5);
 	auto queue = MilesQueueCreate(driver);
 	MilesEventInfoQueueEnable(driver);
-	SetupHooks((PVOID)driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 
 	__int64 project_load = MilesProjectLoad(driver, "D:\\Miles SS10\\apex data - april 9\\audio.mprj", "english", "audio");
 
@@ -107,6 +95,7 @@ int main()
 
 	Bank bank = MilesBankLoad(driver, "D:\\Miles SS10\\apex data - april 9\\general.mbnk", "D:\\Miles SS10\\apex data - april 9\\general_stream.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english.mstr", 0); // 136 MB data
 	MilesBankPatch(bank, "D:\\Miles SS10\\apex data - april 9\\general_stream_patch_1.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english_patch_1.mstr");
+	recorder = new Recorder(bank);
 
 	int bs_ptr = -1;
 	int bank_status = MilesBankGetStatus(bank, &bs_ptr);
@@ -120,6 +109,7 @@ int main()
 		int fielda;
 		int fieldb;
 	} out;
+	SetupHooks((PVOID)driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 	while (true) {
 
 		std::cout << "n: ";
@@ -137,8 +127,11 @@ int main()
 			continue;
 		}
 
-		auto meh = MilesBankGetEventName(bank, i);
-		std::cout << meh << std::endl;
+		if (recorder->Record(i)) {
+			iterationsSinceAppending = 0;
+			receivedFirstSample = false;
+			std::cout << "Recording " << recorder->GetName() << std::endl;
+		}
 
 		MilesBankGetEventTemplateId(bank, i, (long long*)& out);
 		MilesQueueEventVolume(queue, 1);
