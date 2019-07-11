@@ -6,3 +6,5 @@ x64
 *.exp
 *.def
 *.txt
+*.wav
+*.vcxproj.filters
