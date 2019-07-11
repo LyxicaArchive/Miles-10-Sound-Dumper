@@ -1,6 +1,10 @@
 #pragma once
 #include <Windows.h>
 #include <xmmintrin.h>
+#include <vector>
+#include <string>
+#include <sstream>
+
 typedef __int64* Driver;
 typedef __int64* Bank;
 
@@ -16,7 +20,7 @@ extern "C" __declspec(dllimport) Bank MilesBankLoad(__int64 a1, const char *a2, 
 extern "C" __declspec(dllimport) __int64 MilesBankGetStatus(Bank bank, int *a2);
 extern "C" __declspec(dllimport) char* MilesBankStatusToString(__int64 a1);
 extern "C" __declspec(dllimport) __int64 MilesBankPatch(Bank bank, const char *a2, const char *a3);
-extern "C" __declspec(dllimport) __int64* MilesProjectGetBus(__int64 a1, const char *a2);
+extern "C" __declspec(dllimport) __int64* MilesProjectGetBus(Driver driver, const char *a2);
 extern "C" __declspec(dllimport) __int64* MilesSampleCreate(__int64 a1, __int64 a2, __int64 a3);
 extern "C" __declspec(dllimport) void MilesSamplePlay(__int64* a1);
 extern "C" __declspec(dllimport) bool MilesSampleSetSourceRaw(__int64* sample, __int64 a2, __int64 a3, __int64 a4, __int16 a5);
@@ -52,10 +56,5 @@ extern "C" __declspec(dllimport)    void MilesFillWavHeader(PVOID OUT_BUFFER, in
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(__int64 a);
 
 // Helpers
-void SetupBusVolumes(__int64 driver)
-{
-	/*MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Master"), 1);
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Voice_Comm_bus"), 1);
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "SFX_ui"), 1);
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "SFX"), 1);*/
-}
+void SetupBusVolumes(Driver driver);
+std::vector<std::string> GetEventNames(Bank bank);
