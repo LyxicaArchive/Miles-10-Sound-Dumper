@@ -15,15 +15,6 @@
 
 constexpr unsigned int sound_data_size = 1024 * 1024 * 100; // 100 MB
 
-struct unk {
-	__int64* sound_function = 0; 
-	LPCWSTR* endpointID = 0;
-	INT32 channel_count = 0;
-	INT32 maybe_sample_rate = 0;
-	WORD field18 = 0;
-	WORD field1A = 0;
-	__int64 hrtf_buffer = 0;
-};
 byte* sound_data = (byte*) malloc(sound_data_size);
 unsigned int sound_data_cursor = 0;
 byte* buffer_addr;
