@@ -9,10 +9,9 @@ namespace fs = std::filesystem;
 
 void SetupBusVolumes(Driver driver)
 {
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Master"), 1);
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Voice_Comm_bus"), 1);
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "SFX_ui"), 1);
-	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "SFX"), 1);
+	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Master"), 0.7f);
+	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "Voice_Comm_bus"), 0.7f);
+	MilesBusSetVolumeLevel(MilesProjectGetBus(driver, "MUSIC"), 0.7f);
 }
 
 std::vector<std::string> GetEventNames(Bank bank)

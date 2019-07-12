@@ -84,6 +84,7 @@ void _Record(Project project) {
 		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
 		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
 		MilesQueueEventRunByTemplateId(project.queue, (int*)& out);
+		SetupBusVolumes(project.driver);
 		MilesQueueSubmit(project.queue);
 
 		while (recorder->Active()) {
@@ -123,6 +124,7 @@ void _Play(Project project) {
 		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
 		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
 		MilesQueueEventRunByTemplateId(project.queue, (int*)& out);
+		SetupBusVolumes(project.driver);
 		MilesQueueSubmit(project.queue);
 	}
 }
