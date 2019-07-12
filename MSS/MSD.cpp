@@ -1,4 +1,4 @@
-// MSS.cpp : Defines the entry point for the console application.
+// MSD.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <Timeapi.h>
 #include "Miles.h"
-#include "MSS.h"
+#include "MSD.h"
 #include "hooks.h"
 #include "Recorder.h"
 #include <filesystem>
@@ -62,10 +62,10 @@ __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 
 void PrintHelp() {
 	std::cout << "--------- OPTIONS --------" << std::endl
-				<< "\tMSS\t\t\t\t\t-- Open MSS to play sounds" << std::endl
-				<< "\tMSS <EventID>\t\t\t\t-- Dump event ID" << std::endl
-				<< "\tMSS <EventIDStart> <EventIDEnd>\t\t-- Dump a range of sounds, inclusive" << std::endl
-				<< "\tMSS -l\t\t\t\t\t-- Display list of all event IDs and names contained in audio files" << std::endl;
+				<< "\tMSD\t\t\t\t\t-- Open MSD to play sounds" << std::endl
+				<< "\tMSD <EventID>\t\t\t\t-- Dump event ID" << std::endl
+				<< "\tMSD <EventIDStart> <EventIDEnd>\t\t-- Dump a range of sounds, inclusive" << std::endl
+				<< "\tMSD -l\t\t\t\t\t-- Display list of all event IDs and names contained in audio files" << std::endl;
 }
 
 void WINAPI logM(int number, char* message)
@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 	}
 	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/")))
 	{
-		std::cout << "Couldn't find ./audio/ship/ folder. Is MSS inside the Apex Legends folder?" << std::endl;
+		std::cout << "Couldn't find ./audio/ship/ folder. Is MSD inside the Apex Legends folder?" << std::endl;
 		return 1;
 	}
 
