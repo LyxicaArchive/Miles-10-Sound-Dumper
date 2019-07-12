@@ -58,3 +58,4 @@ extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(__int64 a)
 // Helpers
 void SetupBusVolumes(Driver driver);
 std::vector<std::string> GetEventNames(Bank bank);
+Bank LoadProject(Driver driver);

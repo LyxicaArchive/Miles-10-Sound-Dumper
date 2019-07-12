@@ -59,6 +59,7 @@ void WINAPI logM(int number, char* message)
 
 int main()
 {
+
 	int i;
 	int startup_parameters = 0;
 
@@ -80,26 +81,8 @@ int main()
 	auto queue = MilesQueueCreate(driver);
 	MilesEventInfoQueueEnable(driver);
 
-	__int64 project_load = MilesProjectLoad(driver, "D:\\Miles SS10\\apex data - april 9\\audio.mprj", "english", "audio");
-
-	__int64 status = MilesProjectGetStatus(driver);
-	while (status == 0) {
-		Sleep(500);
-		status = MilesProjectGetStatus(driver);
-	}
-	status = MilesProjectGetStatus(driver);
-	std::cout << "status: " << MilesProjectStatusToString(status) << std::endl;
-
-	Bank bank = MilesBankLoad(driver, "D:\\Miles SS10\\apex data - april 9\\general.mbnk", "D:\\Miles SS10\\apex data - april 9\\general_stream.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english.mstr", 0); // 136 MB data
-	MilesBankPatch(bank, "D:\\Miles SS10\\apex data - april 9\\general_stream_patch_1.mstr", "D:\\Miles SS10\\apex data - april 9\\general_english_patch_1.mstr");
+	Bank bank = LoadProject((Driver)driver);
 	recorder = new Recorder(bank);
-
-	int bs_ptr = -1;
-	int bank_status = MilesBankGetStatus(bank, &bs_ptr);
-	while (bank_status == 0) {
-		bank_status = MilesBankGetStatus(bank, &bs_ptr);
-	}
-	std::cout << "bank_status: " << MilesBankStatusToString(bank_status) << std::endl;
 
 	auto events = MilesBankGetEventCount(bank);
 	struct {
