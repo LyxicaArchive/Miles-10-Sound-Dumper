@@ -35,7 +35,6 @@ bool valid_data(byte* buffer, int size) {
 
 	return false;
 }
-
 __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 	if (recorder->Active()) {
 		recorder->Append(buffer_addr, write_size);
@@ -59,8 +58,23 @@ void WINAPI logM(int number, char* message)
 	std::cout << "Message received: " << message << "\r\n";
 }
 
+bool cstrIsDigits(char* string)
+{
+	int x = 0;
+	int len = strlen(string);
+
+	while (x < len) {
+		if (!isdigit(*(string + x)))
+			return false;
+
+		++x;
+	}
+
+	return true;
+}
 int main(int argc, char* argv[])
 {
+	int i;
 	if (argc != 2 && argc != 3) {
 		std::cout << "Invalid parameters" << std::endl;
 		return 1;
@@ -70,63 +84,43 @@ int main(int argc, char* argv[])
 		std::cout << "Couldn't find ./audio/ship/ folder. Is MSS inside the Apex Legends folder?" << std::endl;
 		return 1;
 	}
+
 	if (strcmp(argv[1], "-l") == 0) 
 	{
 		EXPORT_EVENT_NAMES = true;
 	}
 
-	int i;
-	int startup_parameters = 0;
+	Project project = SetupMiles(&logM, EXPORT_EVENT_NAMES);
+	recorder = new Recorder(project.bank);
 
-	MilesSetStartupParameters(&startup_parameters);
-	MilesAllocTrack(2);
-	__int64 startup = MilesStartup(&logM);
-	if (!EXPORT_EVENT_NAMES) 
-	{
-		std::cout << "Start up: " << startup << "\r\n";
-	}
-
-	auto output = MilesOutputDirectSound();
-
-	unk a1;
-	a1.sound_function = (long long*)output;
-	a1.endpointID = NULL; // Default audio Device 
-	a1.maybe_sample_rate = 48000;
-	a1.channel_count = 2;
-	Driver driver = MilesDriverCreate((long long*)&a1);
-
-	MilesDriverRegisterBinkAudio(driver);
-	MilesEventSetStreamingCacheLimit(driver, 0x4000000);
-	MilesDriverSetMasterVolume(driver, 1);
-	auto queue = MilesQueueCreate(driver);
-	MilesEventInfoQueueEnable(driver);
-
-	Bank bank = LoadProject(driver, EXPORT_EVENT_NAMES);
-
-	recorder = new Recorder(bank);
-
-	auto events = MilesBankGetEventCount(bank);
+	auto events = MilesBankGetEventCount(project.bank);
 	struct {
 		int fielda;
 		int fieldb;
 	} out;
 
-	if (strcmp(argv[1], "-l") == 0) {
-		auto names = GetEventNames(bank);
+	if (EXPORT_EVENT_NAMES) {
+		auto names = GetEventNames(project.bank);
 		for (const auto& name : names) {
 			std::cout << name;
 		}
 
 		return 1;
 	}
+	else if (argc == 2 && cstrIsDigits(argv[1])) {
 
-	SetupHooks(driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
+	}
+	else {
+		std::cout << "Invalid parameters" << std::endl;
+		return 1;
+	}
+
+	SetupHooks(project.driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 	while (true) {
-
 		while (recorder->Active()) {
 			if (GetAsyncKeyState(VK_ESCAPE) & 0x80) {
 				std::cout << "STOP" << std::endl;
-				StopPlaying(queue);
+				StopPlaying(project.queue);
 				break;
 			}
 		}
@@ -144,12 +138,12 @@ int main(int argc, char* argv[])
 			std::cout << "Recording " << recorder->GetName() << " (ESC to stop)" << std::endl;
 		}
 
-		MilesBankGetEventTemplateId(bank, i, (long long*)& out);
-		MilesQueueEventVolume(queue, 1);
-		MilesQueueControllerValue(queue, "GameMusicVolume", 1);
-		MilesQueueControllerValue(queue, "DialogueVolume", 1);
-		MilesQueueEventRunByTemplateId(queue, (int*)& out);
-		MilesQueueSubmit(queue);
+		MilesBankGetEventTemplateId(project.bank, i, (long long*)& out);
+		MilesQueueEventVolume(project.queue, 1);
+		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
+		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
+		MilesQueueEventRunByTemplateId(project.queue, (int*)& out);
+		MilesQueueSubmit(project.queue);
 	}
 		
 	std::cin >> i;

@@ -58,7 +58,24 @@ extern "C" __declspec(dllimport)    void MilesFillWavHeader(PVOID OUT_BUFFER, in
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(Driver driver);
 
 // Helpers
+struct Project {
+	Driver driver;
+	Bank bank;
+	Queue queue;
+};
+
 void SetupBusVolumes(Driver driver);
 std::vector<std::string> GetEventNames(Bank bank);
-Bank LoadProject(Driver driver, bool silent);
+Project SetupMiles(void (WINAPI* callback)(int, char*), bool silent);
 void StopPlaying(Queue queue);
+
+// Structures
+struct unk {
+	__int64* sound_function = 0;
+	LPCWSTR* endpointID = 0;
+	INT32 channel_count = 0;
+	INT32 maybe_sample_rate = 0;
+	WORD field18 = 0;
+	WORD field1A = 0;
+	__int64 hrtf_buffer = 0;
+};
