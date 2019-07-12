@@ -17,12 +17,15 @@ public:
 	
 private:
 	unsigned char* data = new unsigned char[BUFFER_SIZE];
-	unsigned int cursor = 0;
-	char* eventName = 0;
-	unsigned int eventId = 0;
+	unsigned int cursor;
+	char* eventName;
+	unsigned int eventId;
 	Bank bank;
-	bool active = false;
+	bool active;
+	DWORD timeLastNonSilentSample; // Timestamp of the last received audio buffer frame that contains audio (ie not full of 0s)
+	bool firstSampleReceived;
 
+	static bool IsDataSilent(byte* buffer, int size);
 	void Reset();
 };
 

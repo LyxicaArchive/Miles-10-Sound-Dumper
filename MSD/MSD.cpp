@@ -26,7 +26,6 @@ std::vector<int> queuedEvents;
 Recorder* recorder = 0;
 byte* buffer_addr;
 int write_size;
-DWORD timeLastRecvFrame; // Timestamp of the last received audio buffer frame that contains audio (ie not full of 0s)
 
 __int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size) {
 	write_size = size;
@@ -35,26 +34,9 @@ __int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size)
 	return return_val;
 }
 
-bool valid_data(byte* buffer, int size) {
-	for (int i = 0; i < size; i++) {
-		if (buffer[i] != 0) { return true; }
-	}
-
-	return false;
-}
 __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 	if (recorder->Active()) {
 		recorder->Append(buffer_addr, write_size);
-
-		if (valid_data(buffer_addr, write_size))
-		{
-			timeLastRecvFrame = timeGetTime();
-		}
-		else if (timeGetTime() - timeLastRecvFrame > 250) // After 250ms of silence, the sound is probably done.
-		{
-			recorder->Save();
-			queuedEvents.pop_back();
-		}
 	}
 
 	return hook2(a1);
@@ -77,7 +59,6 @@ void _Record(Project project) {
 	while (queuedEvents.size() > 0) {
 		recorder->Record(queuedEvents.back());
 		std::cout << "Recording " << recorder->GetName() << std::endl;
-		timeLastRecvFrame = timeGetTime();
 
 		MilesBankGetEventTemplateId(project.bank, queuedEvents.back(), (long long*)& out);
 		MilesQueueEventVolume(project.queue, 1);
@@ -93,6 +74,7 @@ void _Record(Project project) {
 			}
 			Sleep(25);
 		}
+		queuedEvents.pop_back();
 		Sleep(100); // Give the MilesMixer thread time to process any changes.
 	}
 }

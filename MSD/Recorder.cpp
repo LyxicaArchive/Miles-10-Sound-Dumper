@@ -1,10 +1,19 @@
 #include "stdafx.h"
 #include "Recorder.h"
 #include "Miles.h"
+#include <iostream>
+
+bool Recorder::IsDataSilent(byte* buffer, int size) {
+	for (int i = 0; i < size; i++) {
+		if (buffer[i] != 0) { return false; }
+	}
+
+	return true;
+}
 
 Recorder::Recorder(Bank bank) : bank(bank)
 {
-
+	Reset();
 }
 
 bool Recorder::Save() 
@@ -31,6 +40,7 @@ bool Recorder::Record(unsigned int eventId)
 	if (Active()) { return false; }
 	
 	eventName = MilesBankGetEventName(bank, eventId);
+	timeLastNonSilentSample = timeGetTime();
 	this->eventId = eventId;
 	active = true;
 	return true;
@@ -45,6 +55,36 @@ char* Recorder::GetName()
 
 void Recorder::Append(PVOID buffer, unsigned int length)
 {
+	/// Three situations:
+	// Audio recording just started, and the event starts with silence. After enough continuous silence, kill it. (Event with no audio)
+	// Audio recording has been in progress, and we just received a silent sample. After enough continuous silence, kill it. (End of event)
+	// Audio recording has been in progress, no silence. 
+	auto isSilent = IsDataSilent((byte*)buffer, length);
+	if (!firstSampleReceived && !isSilent) { firstSampleReceived = true; }
+	if (isSilent)
+	{
+		if (firstSampleReceived) 
+		{
+			if (timeGetTime() - timeLastNonSilentSample > 250)
+			{
+				Save();
+				return;
+			}
+		} 
+		else
+		{
+			if (timeGetTime() - timeLastNonSilentSample > 3000)
+			{
+				Save();
+				return;
+			}
+			return; // Don't record silence when at the beginning of an event
+		}
+	}
+	else 
+	{
+		timeLastNonSilentSample = timeGetTime();
+	}
 	memcpy(data + cursor, buffer, length);
 	cursor += length;
 }
@@ -66,4 +106,5 @@ void Recorder::Reset()
 	eventName = NULL;
 	eventId = NULL;
 	active = false;
+	firstSampleReceived = false;
 }
