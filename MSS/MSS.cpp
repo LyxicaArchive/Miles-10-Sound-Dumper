@@ -69,12 +69,14 @@ int main()
 	std::cout << "Start up: " << startup << "\r\n";
 
 	auto output = MilesOutputDirectSound();
+
 	unk a1;
 	a1.sound_function = (long long*)output;
 	a1.endpointID = NULL; // Default audio Device 
 	a1.maybe_sample_rate = 48000;
 	a1.channel_count = 2;
 	Driver driver = MilesDriverCreate((long long*)&a1);
+
 	MilesDriverRegisterBinkAudio(driver);
 	MilesEventSetStreamingCacheLimit(driver, 0x4000000);
 	MilesDriverSetMasterVolume(driver, 0.5);
@@ -92,6 +94,14 @@ int main()
 	SetupHooks(driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 	while (true) {
 
+		while (recorder->Active()) {
+			if (GetAsyncKeyState(VK_ESCAPE) & 0x80) {
+				std::cout << "STOP" << std::endl;
+				StopPlaying(queue);
+				break;
+			}
+		}
+
 		std::cout << "n: ";
 		std::cin >> i;
 
@@ -100,16 +110,9 @@ int main()
 			continue;
 		}
 
-		if (i < 0) {
-			MilesQueueEventRunByTemplateId(queue, (int*)& out);
-			MilesQueueEventRun(queue, "STOPNOW");
-			MilesQueueSubmit(queue);
-			continue;
-		}
-
 		if (recorder->Record(i)) {
 			timeLastRecvFrame = timeGetTime();
-			std::cout << "Recording " << recorder->GetName() << std::endl;
+			std::cout << "Recording " << recorder->GetName() << " (ESC to stop)" << std::endl;
 		}
 
 		MilesBankGetEventTemplateId(bank, i, (long long*)& out);

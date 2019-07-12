@@ -21,6 +21,7 @@ private:
 	char* eventName = 0;
 	unsigned int eventId = 0;
 	Bank bank;
+	bool active = false;
 
 	void Reset();
 };

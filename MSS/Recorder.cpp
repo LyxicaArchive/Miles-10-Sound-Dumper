@@ -29,7 +29,8 @@ bool Recorder::Save()
 bool Recorder::Record(unsigned int eventId)
 {
 	if (Active()) { return false; }
-
+	
+	active = true;
 	eventName = MilesBankGetEventName(bank, eventId);
 	this->eventId = eventId;
 }
@@ -49,7 +50,7 @@ void Recorder::Append(PVOID buffer, unsigned int length)
 
 bool Recorder::Active()
 {
-	return eventName != NULL;
+	return active;
 }
 
 Recorder::~Recorder()
@@ -63,4 +64,5 @@ void Recorder::Reset()
 	cursor = 0;
 	eventName = NULL;
 	eventId = NULL;
+	active = false;
 }

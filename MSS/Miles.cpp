@@ -105,3 +105,9 @@ Bank LoadProject(Driver driver)
 
 	return bank;
 }
+
+void StopPlaying(Queue queue) 
+{
+	MilesQueueEventRun(queue, "STOPNOW");
+	MilesQueueSubmit(queue);
+}
