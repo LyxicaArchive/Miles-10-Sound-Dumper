@@ -74,14 +74,14 @@ int main()
 	a1.endpointID = NULL; // Default audio Device 
 	a1.maybe_sample_rate = 48000;
 	a1.channel_count = 2;
-	__int64 driver = MilesDriverCreate((long long*)&a1);
+	Driver driver = MilesDriverCreate((long long*)&a1);
 	MilesDriverRegisterBinkAudio(driver);
 	MilesEventSetStreamingCacheLimit(driver, 0x4000000);
 	MilesDriverSetMasterVolume(driver, 0.5);
 	auto queue = MilesQueueCreate(driver);
 	MilesEventInfoQueueEnable(driver);
 
-	Bank bank = LoadProject((Driver)driver);
+	Bank bank = LoadProject(driver);
 	recorder = new Recorder(bank);
 
 	auto events = MilesBankGetEventCount(bank);
@@ -89,7 +89,7 @@ int main()
 		int fielda;
 		int fieldb;
 	} out;
-	SetupHooks((PVOID)driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
+	SetupHooks(driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 	while (true) {
 
 		std::cout << "n: ";

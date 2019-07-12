@@ -71,14 +71,14 @@ Bank LoadProject(Driver driver)
 	GetMatchingFile(std::regex("audio.mprj$"), &project);
 	GetLocalizedLanguage(&language);
 
-	MilesProjectLoad((long long)driver, project.c_str(), language.c_str(), "audio");
+	MilesProjectLoad(driver, project.c_str(), language.c_str(), "audio");
 
-	__int64 status = MilesProjectGetStatus((long long)driver);
+	__int64 status = MilesProjectGetStatus(driver);
 	while (status == 0) {
 		Sleep(500);
-		status = MilesProjectGetStatus((long long)driver);
+		status = MilesProjectGetStatus(driver);
 	}
-	status = MilesProjectGetStatus((long long)driver);
+	status = MilesProjectGetStatus(driver);
 	std::cout << "status: " << MilesProjectStatusToString(status) << std::endl;
 
 	std::string mbnk;
@@ -87,7 +87,7 @@ Bank LoadProject(Driver driver)
 	GetMatchingFile(std::regex("general\\.mbnk$"), &mbnk);
 	GetMatchingFile(std::regex("general_stream\\.mstr"), &general);
 	GetMatchingFile(std::regex("general_\\w*\\.mstr"), &localized);
-	Bank bank = MilesBankLoad((long long)driver, mbnk.c_str(), general.c_str(), localized.c_str(), 0);
+	Bank bank = MilesBankLoad(driver, mbnk.c_str(), general.c_str(), localized.c_str(), 0);
 
 	if (IsPatched()) {
 		std::string general_patch;
