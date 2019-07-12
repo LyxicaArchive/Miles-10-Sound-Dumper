@@ -175,13 +175,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\x64\Debug\mileswin64.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\x64\Debug\mileswin64.dll" />
-    <None Include="..\x64\Debug\mileswin64.exp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
