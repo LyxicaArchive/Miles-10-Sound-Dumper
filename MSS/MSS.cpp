@@ -60,6 +60,14 @@ __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 	return hook2(a1);
 }
 
+void PrintHelp() {
+	std::cout << "--------- OPTIONS --------" << std::endl
+				<< "\tMSS\t\t\t\t\t-- Open MSS to play sounds" << std::endl
+				<< "\tMSS <EventID>\t\t\t\t-- Dump event ID" << std::endl
+				<< "\tMSS <EventIDStart> <EventIDEnd>\t\t-- Dump a range of sounds, inclusive" << std::endl
+				<< "\tMSS -l\t\t\t\t\t-- Display list of all event IDs and names contained in audio files" << std::endl;
+}
+
 void WINAPI logM(int number, char* message)
 {
 	std::cout << "Message received: " << message << "\r\n";
@@ -149,6 +157,7 @@ int main(int argc, char* argv[])
 			if (!cstrIsDigits(argv[1]))
 			{
 				std::cout << "Event ID passed contained invalid characters" << std::endl;
+				PrintHelp();
 				return 1;
 			}
 			queuedEvents.push_back(atoi(argv[1]));
@@ -159,11 +168,13 @@ int main(int argc, char* argv[])
 		if (!cstrIsDigits(argv[1]))
 		{
 			std::cout << "First event ID passed contained invalid characters" << std::endl;
+			PrintHelp();
 			return 1;
 		}
 		if (!cstrIsDigits(argv[2]))
 		{
 			std::cout << "Second event ID passed contained invalid characters" << std::endl;
+			PrintHelp();
 			return 1;
 		}
 		for (int i = atoi(argv[1]); i <= atoi(argv[2]); i++) {
@@ -172,7 +183,8 @@ int main(int argc, char* argv[])
 		RECORDING_SESSION = true;
 		break;
 	default:
-		throw;
+		PrintHelp();
+		return 1;
 	}
 	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/")))
 	{
