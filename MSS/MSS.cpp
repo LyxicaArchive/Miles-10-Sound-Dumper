@@ -15,6 +15,13 @@
 #include "Recorder.h"
 #include <filesystem>
 bool EXPORT_EVENT_NAMES = false;
+bool RECORDING_SESSION = false;
+unsigned int events;
+struct {
+	int fielda;
+	int fieldb;
+} out;
+std::vector<int> queuedEvents;
 
 Recorder* recorder = 0;
 byte* buffer_addr;
@@ -45,8 +52,8 @@ __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 		}
 		else if (timeGetTime() - timeLastRecvFrame > 250) // After 250ms of silence, the sound is probably done.
 		{
-			std::cout << "Saving " << recorder->GetName() << std::endl;
 			recorder->Save();
+			queuedEvents.pop_back();
 		}
 	}
 
@@ -58,6 +65,59 @@ void WINAPI logM(int number, char* message)
 	std::cout << "Message received: " << message << "\r\n";
 }
 
+void _Record(Project project) {
+	while (queuedEvents.size() > 0) {
+		recorder->Record(queuedEvents.back());
+		std::cout << "Recording " << recorder->GetName() << std::endl;
+		timeLastRecvFrame = timeGetTime();
+
+		MilesBankGetEventTemplateId(project.bank, queuedEvents.back(), (long long*)& out);
+		MilesQueueEventVolume(project.queue, 1);
+		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
+		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
+		MilesQueueEventRunByTemplateId(project.queue, (int*)& out);
+		MilesQueueSubmit(project.queue);
+
+		while (recorder->Active()) {
+			if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
+				StopPlaying(project.queue);
+			}
+			Sleep(25);
+		}
+		Sleep(100); // Give the MilesMixer thread time to process any changes.
+	}
+}
+void _Play(Project project) {
+	int i;
+	while (true) {
+		while (recorder->Active()) {
+			if (GetAsyncKeyState(VK_ESCAPE) & 0x80) {
+				StopPlaying(project.queue);
+				break;
+			}
+		}
+
+		std::cout << "Play Event ID: ";
+		std::cin >> i;
+
+		if (i < 0) {
+			StopPlaying(project.queue);
+			continue;
+		}
+		if (i >= events) {
+			std::cout << "Invalid event ID" << std::endl;
+			continue;
+		}
+
+		std::cout << "Playing " << MilesBankGetEventName(project.bank, i) << " (enter negative number to stop)" << std::endl;
+		MilesBankGetEventTemplateId(project.bank, i, (long long*)& out);
+		MilesQueueEventVolume(project.queue, 1);
+		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
+		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
+		MilesQueueEventRunByTemplateId(project.queue, (int*)& out);
+		MilesQueueSubmit(project.queue);
+	}
+}
 bool cstrIsDigits(char* string)
 {
 	int x = 0;
@@ -74,31 +134,57 @@ bool cstrIsDigits(char* string)
 }
 int main(int argc, char* argv[])
 {
-	int i;
-	if (argc != 2 && argc != 3) {
-		std::cout << "Invalid parameters" << std::endl;
-		return 1;
+	switch (argc)
+	{
+	case 1:
+		RECORDING_SESSION = false;
+		break;
+	case 2:
+		if (strcmp(argv[1], "-l") == 0)
+		{
+			EXPORT_EVENT_NAMES = true;
+		}
+		else
+		{
+			if (!cstrIsDigits(argv[1]))
+			{
+				std::cout << "Event ID passed contained invalid characters" << std::endl;
+				return 1;
+			}
+			queuedEvents.push_back(atoi(argv[1]));
+			RECORDING_SESSION = true;
+		}
+		break;
+	case 3: 
+		if (!cstrIsDigits(argv[1]))
+		{
+			std::cout << "First event ID passed contained invalid characters" << std::endl;
+			return 1;
+		}
+		if (!cstrIsDigits(argv[2]))
+		{
+			std::cout << "Second event ID passed contained invalid characters" << std::endl;
+			return 1;
+		}
+		for (int i = atoi(argv[1]); i <= atoi(argv[2]); i++) {
+			queuedEvents.push_back(i);
+		}
+		RECORDING_SESSION = true;
+		break;
+	default:
+		throw;
 	}
-	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/"))) 
+	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/")))
 	{
 		std::cout << "Couldn't find ./audio/ship/ folder. Is MSS inside the Apex Legends folder?" << std::endl;
 		return 1;
 	}
 
-	if (strcmp(argv[1], "-l") == 0) 
-	{
-		EXPORT_EVENT_NAMES = true;
-	}
-
+	int i;
 	Project project = SetupMiles(&logM, EXPORT_EVENT_NAMES);
 	recorder = new Recorder(project.bank);
 
-	auto events = MilesBankGetEventCount(project.bank);
-	struct {
-		int fielda;
-		int fieldb;
-	} out;
-
+	events = MilesBankGetEventCount(project.bank);
 	if (EXPORT_EVENT_NAMES) {
 		auto names = GetEventNames(project.bank);
 		for (const auto& name : names) {
@@ -107,45 +193,14 @@ int main(int argc, char* argv[])
 
 		return 1;
 	}
-	else if (argc == 2 && cstrIsDigits(argv[1])) {
-
+	if (RECORDING_SESSION)
+	{
+		SetupHooks(project.driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
+		_Record(project);
 	}
 	else {
-		std::cout << "Invalid parameters" << std::endl;
-		return 1;
+		_Play(project);
 	}
-
-	SetupHooks(project.driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
-	while (true) {
-		while (recorder->Active()) {
-			if (GetAsyncKeyState(VK_ESCAPE) & 0x80) {
-				std::cout << "STOP" << std::endl;
-				StopPlaying(project.queue);
-				break;
-			}
-		}
-
-		std::cout << "n: ";
-		std::cin >> i;
-
-		if (i >= events) {
-			std::cout << "invalid" << std::endl;
-			continue;
-		}
-
-		if (recorder->Record(i)) {
-			timeLastRecvFrame = timeGetTime();
-			std::cout << "Recording " << recorder->GetName() << " (ESC to stop)" << std::endl;
-		}
-
-		MilesBankGetEventTemplateId(project.bank, i, (long long*)& out);
-		MilesQueueEventVolume(project.queue, 1);
-		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
-		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
-		MilesQueueEventRunByTemplateId(project.queue, (int*)& out);
-		MilesQueueSubmit(project.queue);
-	}
-		
-	std::cin >> i;
+	
 	return 0;
 }

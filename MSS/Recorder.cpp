@@ -30,9 +30,9 @@ bool Recorder::Record(unsigned int eventId)
 {
 	if (Active()) { return false; }
 	
-	active = true;
 	eventName = MilesBankGetEventName(bank, eventId);
 	this->eventId = eventId;
+	active = true;
 }
 
 char* Recorder::GetName()
