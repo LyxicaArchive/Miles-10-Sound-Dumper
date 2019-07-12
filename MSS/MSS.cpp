@@ -59,6 +59,11 @@ void WINAPI logM(int number, char* message)
 
 int main()
 {
+	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/"))) 
+	{
+		std::cout << "Couldn't find ./audio/ship/ folder. Is MSS inside the Apex Legends folder?" << std::endl;
+		return 1;
+	}
 
 	int i;
 	int startup_parameters = 0;
