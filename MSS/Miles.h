@@ -19,7 +19,7 @@ extern "C" __declspec(dllimport) __int64 MilesProjectGetStatus(Driver driver);
 extern "C" __declspec(dllimport) void MilesAllocTrack(__int64 a1);
 extern "C" __declspec(dllimport) char* MilesProjectStatusToString(__int64 a1);
 extern "C" __declspec(dllimport) Bank MilesBankLoad(Driver driver, const char *a2, const char *a3, const char *a4, __int64 a5);
-extern "C" __declspec(dllimport) __int64 MilesBankGetStatus(Bank bank, int *a2);
+extern "C" __declspec(dllimport) int MilesBankGetStatus(Bank bank, int *a2);
 extern "C" __declspec(dllimport) char* MilesBankStatusToString(__int64 a1);
 extern "C" __declspec(dllimport) __int64 MilesBankPatch(Bank bank, const char *a2, const char *a3);
 extern "C" __declspec(dllimport) Bus MilesProjectGetBus(Driver driver, const char *a2);
@@ -30,7 +30,7 @@ extern "C" __declspec(dllimport) bool MilesSampleSetSource(__int64* sample, __in
 extern "C" __declspec(dllimport) int MilesSetStartupParameters(int *a);
 extern "C" __declspec(dllimport) __int64 (*MilesOutputDirectSound())(__int64* OUT_buffer, int, int, unsigned int, int, __int64);
 extern "C" __declspec(dllimport) __int64 MilesDriverRegisterDecoder(Driver driver, __int64*);
-extern "C" __declspec(dllimport) __int64 MilesBankGetEventCount(Bank bank);
+extern "C" __declspec(dllimport) int MilesBankGetEventCount(Bank bank);
 extern "C" __declspec(dllimport) __int64 MilesBankGetSourceCount(Bank bank);
 extern "C" __declspec(dllimport) char* MilesBankGetSourceName(Bank bank, int);
 extern "C" __declspec(dllimport) char* MilesBankGetEventName(Bank bank, int);

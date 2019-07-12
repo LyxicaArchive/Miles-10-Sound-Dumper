@@ -16,7 +16,7 @@
 #include <filesystem>
 bool EXPORT_EVENT_NAMES = false;
 bool RECORDING_SESSION = false;
-unsigned int events;
+int events;
 struct {
 	int fielda;
 	int fieldb;
@@ -104,7 +104,7 @@ void _Play(Project project) {
 				break;
 			}
 		}
-
+		 
 		std::cout << "Play Event ID: ";
 		std::cin >> i;
 
@@ -129,7 +129,7 @@ void _Play(Project project) {
 bool cstrIsDigits(char* string)
 {
 	int x = 0;
-	int len = strlen(string);
+	auto len = strlen(string);
 
 	while (x < len) {
 		if (!isdigit(*(string + x)))
@@ -192,7 +192,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	int i;
 	Project project = SetupMiles(&logM, EXPORT_EVENT_NAMES);
 	recorder = new Recorder(project.bank);
 
