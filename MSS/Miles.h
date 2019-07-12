@@ -60,5 +60,5 @@ extern "C" __declspec(dllimport) __int64 MilesDriverRegisterBinkAudio(Driver dri
 // Helpers
 void SetupBusVolumes(Driver driver);
 std::vector<std::string> GetEventNames(Bank bank);
-Bank LoadProject(Driver driver);
+Bank LoadProject(Driver driver, bool silent);
 void StopPlaying(Queue queue);

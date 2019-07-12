@@ -64,7 +64,7 @@ bool IsPatched()
 	return GetMatchingFile(std::regex("_patch_"), 0);
 }
 
-Bank LoadProject(Driver driver) 
+Bank LoadProject(Driver driver, bool silent) 
 { 
 	std::string project;
 	std::string language;
@@ -79,7 +79,10 @@ Bank LoadProject(Driver driver)
 		status = MilesProjectGetStatus(driver);
 	}
 	status = MilesProjectGetStatus(driver);
-	std::cout << "status: " << MilesProjectStatusToString(status) << std::endl;
+	if (!silent) 
+	{ 
+		std::cout << "status: " << MilesProjectStatusToString(status) << std::endl; 
+	}
 
 	std::string mbnk;
 	std::string general;
@@ -101,7 +104,10 @@ Bank LoadProject(Driver driver)
 	while (bank_status == 0) {
 		bank_status = MilesBankGetStatus(bank, 0);
 	}
-	std::cout << "bank_status: " << MilesBankStatusToString(bank_status) << std::endl;
+	if (!silent) 
+	{ 
+		std::cout << "bank_status: " << MilesBankStatusToString(bank_status) << std::endl;
+	}
 
 	return bank;
 }

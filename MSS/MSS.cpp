@@ -13,6 +13,8 @@
 #include "MSS.h"
 #include "hooks.h"
 #include "Recorder.h"
+#include <filesystem>
+bool EXPORT_EVENT_NAMES = false;
 
 Recorder* recorder = 0;
 byte* buffer_addr;
@@ -57,12 +59,20 @@ void WINAPI logM(int number, char* message)
 	std::cout << "Message received: " << message << "\r\n";
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+	if (argc != 2 && argc != 3) {
+		std::cout << "Invalid parameters" << std::endl;
+		return 1;
+	}
 	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/"))) 
 	{
 		std::cout << "Couldn't find ./audio/ship/ folder. Is MSS inside the Apex Legends folder?" << std::endl;
 		return 1;
+	}
+	if (strcmp(argv[1], "-l") == 0) 
+	{
+		EXPORT_EVENT_NAMES = true;
 	}
 
 	int i;
@@ -71,7 +81,10 @@ int main()
 	MilesSetStartupParameters(&startup_parameters);
 	MilesAllocTrack(2);
 	__int64 startup = MilesStartup(&logM);
-	std::cout << "Start up: " << startup << "\r\n";
+	if (!EXPORT_EVENT_NAMES) 
+	{
+		std::cout << "Start up: " << startup << "\r\n";
+	}
 
 	auto output = MilesOutputDirectSound();
 
@@ -84,11 +97,12 @@ int main()
 
 	MilesDriverRegisterBinkAudio(driver);
 	MilesEventSetStreamingCacheLimit(driver, 0x4000000);
-	MilesDriverSetMasterVolume(driver, 0.5);
+	MilesDriverSetMasterVolume(driver, 1);
 	auto queue = MilesQueueCreate(driver);
 	MilesEventInfoQueueEnable(driver);
 
-	Bank bank = LoadProject(driver);
+	Bank bank = LoadProject(driver, EXPORT_EVENT_NAMES);
+
 	recorder = new Recorder(bank);
 
 	auto events = MilesBankGetEventCount(bank);
@@ -96,6 +110,16 @@ int main()
 		int fielda;
 		int fieldb;
 	} out;
+
+	if (strcmp(argv[1], "-l") == 0) {
+		auto names = GetEventNames(bank);
+		for (const auto& name : names) {
+			std::cout << name;
+		}
+
+		return 1;
+	}
+
 	SetupHooks(driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 	while (true) {
 
