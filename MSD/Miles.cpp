@@ -45,7 +45,7 @@ bool GetMatchingFile(std::regex reg, std::string* out)
 
 bool GetLocalizedLanguage(std::string* out)
 {
-	auto reg = std::regex("general_(\\w*)_patch_\\d.mstr");
+	auto reg = std::regex("general_(\\w*).mstr");
 	for (const auto& entry : fs::directory_iterator(fs::path("./audio/ship/")))
 	{
 		std::smatch languageMatch;
