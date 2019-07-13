@@ -127,6 +127,7 @@ bool cstrIsDigits(const char* string)
 	int x = 0;
 	auto len = strlen(string);
 
+	if (string[0] == '-') { x = 1; }
 	while (x < len) {
 		if (!isdigit(*(string + x)))
 			return false;
