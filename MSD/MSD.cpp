@@ -142,16 +142,19 @@ int main(int argc, char* argv[])
 	switch (argc)
 	{
 	case 1:
+		std::cout << "Missing path to Miles data folder! Correct Syntax is MSD <path to data> [args]." << std::endl;
+		std::cout << "Example with executable in Apex Legends root: MSD ./audio/ship [args]" << std::endl;
+	case 2:
 		RECORDING_SESSION = false;
 		break;
-	case 2:
-		if (strcmp(argv[1], "-l") == 0)
+	case 3:
+		if (strcmp(argv[2], "-l") == 0)
 		{
 			EXPORT_EVENT_NAMES = true;
 		}
 		else
 		{
-			if (!cstrIsDigits(argv[1]))
+			if (!cstrIsDigits(argv[2]))
 			{
 				std::cout << "Event ID passed contained invalid characters" << std::endl;
 				PrintHelp();
@@ -161,20 +164,20 @@ int main(int argc, char* argv[])
 			RECORDING_SESSION = true;
 		}
 		break;
-	case 3: 
-		if (!cstrIsDigits(argv[1]))
+	case 4: 
+		if (!cstrIsDigits(argv[2]))
 		{
 			std::cout << "First event ID passed contained invalid characters" << std::endl;
 			PrintHelp();
 			return 1;
 		}
-		if (!cstrIsDigits(argv[2]))
+		if (!cstrIsDigits(argv[3]))
 		{
 			std::cout << "Second event ID passed contained invalid characters" << std::endl;
 			PrintHelp();
 			return 1;
 		}
-		for (int i = atoi(argv[1]); i <= atoi(argv[2]); i++) {
+		for (int i = atoi(argv[2]); i <= atoi(argv[3]); i++) {
 			queuedEvents.push_back(i);
 		}
 		RECORDING_SESSION = true;
@@ -183,13 +186,15 @@ int main(int argc, char* argv[])
 		PrintHelp();
 		return 1;
 	}
-	if (!std::filesystem::exists(std::filesystem::path("./audio/ship/")))
+	if (!std::filesystem::exists(std::filesystem::path(argv[1])))
 	{
-		std::cout << "Couldn't find ./audio/ship/ folder. Is MSD inside the Apex Legends folder?" << std::endl;
+		std::cout << "Couldn't find target folder. Did you enter the path correctly? ";
+		std::cout << "If you're entering an abbreviated path ensure that you're specifying folder root. ";
+		std::cout << "Example path from top level game directory to data would be ./audio/ship" << std::endl;
 		return 1;
 	}
 
-	Project project = SetupMiles(&logM, EXPORT_EVENT_NAMES);
+	Project project = SetupMiles(&logM, argv[1], EXPORT_EVENT_NAMES);
 	recorder = new Recorder(project.bank);
 
 	events = MilesBankGetEventCount(project.bank);

@@ -66,7 +66,7 @@ struct Project {
 
 void SetupBusVolumes(Driver driver);
 std::vector<std::string> GetEventNames(Bank bank);
-Project SetupMiles(void (WINAPI* callback)(int, char*), bool silent);
+Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bool silent);
 void StopPlaying(Queue queue);
 
 // Structures
