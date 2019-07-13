@@ -26,9 +26,9 @@ std::vector<std::string> GetEventNames(Bank bank)
 	return collectedNames;
 }
 
-bool GetMatchingFile(std::regex reg, std::string* out)
+bool GetMatchingFile(std::regex reg, std::string* out, std::string dir_path)
 {
-	for (const auto& entry : fs::directory_iterator(fs::path("./audio/ship/")))
+	for (const auto& entry : fs::directory_iterator(fs::path(dir_path)))
 	{
 		if (std::regex_search(entry.path().string(), reg))
 		{
@@ -42,10 +42,10 @@ bool GetMatchingFile(std::regex reg, std::string* out)
 	return false;
 }
 
-bool GetLocalizedLanguage(std::string* out)
+bool GetLocalizedLanguage(std::string* out, std::string dir_path)
 {
 	auto reg = std::regex("general_(\\w*).mstr");
-	for (const auto& entry : fs::directory_iterator(fs::path("./audio/ship/")))
+	for (const auto& entry : fs::directory_iterator(fs::path(dir_path)))
 	{
 		std::smatch languageMatch;
 		std::string path = entry.path().string();
@@ -58,13 +58,13 @@ bool GetLocalizedLanguage(std::string* out)
 	return false;
 }
 
-bool IsPatched()
+bool IsPatched(std::string dir_path)
 {
-	return GetMatchingFile(std::regex("_patch_"), 0);
+	return GetMatchingFile(std::regex("_patch_"), 0, dir_path);
 }
 
 
-Project SetupMiles(void (WINAPI* callback)(int, char*), bool silent)
+Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bool silent)
 { 
 	Project project;
 	int startup_parameters = 0;
@@ -94,10 +94,24 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), bool silent)
 
 	std::string mprj;
 	std::string language;
-	GetMatchingFile(std::regex("audio.mprj$"), &mprj);
-	GetLocalizedLanguage(&language);
+	GetMatchingFile(std::regex(".mprj$"), &mprj, dir_path);
+	GetLocalizedLanguage(&language, dir_path);
 
-	MilesProjectLoad(project.driver, mprj.c_str(), language.c_str(), "audio");
+	std::string project_name = mprj;
+
+	//Extract project name from .mprj path. Sourced from https://stackoverflow.com/questions/8520560/get-a-file-name-from-a-path
+	const size_t last_slash_idx = project_name.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx)
+	{
+		project_name.erase(0, last_slash_idx + 1);
+	}
+	const size_t period_idx = project_name.rfind('.');
+	if (std::string::npos != period_idx)
+	{
+		project_name.erase(period_idx);
+	}
+
+	MilesProjectLoad(project.driver, mprj.c_str(), language.c_str(), project_name.c_str());
 
 	__int64 status = MilesProjectGetStatus(project.driver);
 	while (status == 0) {
@@ -113,16 +127,16 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), bool silent)
 	std::string mbnk;
 	std::string general;
 	std::string localized;
-	GetMatchingFile(std::regex("general\\.mbnk$"), &mbnk);
-	GetMatchingFile(std::regex("general_stream\\.mstr"), &general);
-	GetMatchingFile(std::regex("general_\\w*\\.mstr"), &localized);
+	GetMatchingFile(std::regex("general\\.mbnk$"), &mbnk, dir_path);
+	GetMatchingFile(std::regex("general_stream\\.mstr"), &general, dir_path);
+	GetMatchingFile(std::regex("general_((?!stream)\\w)*\\.mstr"), &localized, dir_path);
 	project.bank = MilesBankLoad(project.driver, mbnk.c_str(), general.c_str(), localized.c_str(), 0);
 
-	if (IsPatched()) {
+	if (IsPatched(dir_path)) {
 		std::string general_patch;
 		std::string localized_patch;
-		GetMatchingFile(std::regex("general_stream_patch_\\d\\.mstr"), &general_patch);
-		GetMatchingFile(std::regex("general_\\w*_patch_\\d\\.mstr"), &localized_patch);
+		GetMatchingFile(std::regex("general_stream_patch_\\d\\.mstr"), &general_patch, dir_path);
+		GetMatchingFile(std::regex("general_((?!stream)\\w)*\\_patch_\\d\\.mstr"), &localized_patch, dir_path);
 		MilesBankPatch(project.bank, general_patch.c_str(), localized_patch.c_str());
 	}
 
