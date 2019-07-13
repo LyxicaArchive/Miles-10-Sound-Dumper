@@ -1,7 +1,11 @@
 # Miles-10-Sound-Dumper
 Greetings, I've now finished the first beta version of my miles 10 sound dumper. I think I have most bugs ironed out, but obviously please let me know if something is broken. 
 
-In order to use the sound dumper, you'll have to place it inside the Apex Legends folder, right where r5apex.exe is. Then using the command line you can play any sound (as far as I know) and dump them. You will have to specify the path to the Miles folder. In the case of Apex Legends, the path from MSD inside the Apex Legends folder to the Miles folder would be .\audio\ship.
+In order to use the sound dumper, you'll have to place it inside the Apex Legends folder, right where r5apex.exe is. Then using the command line you can play any sound (as far as I know) and dump them. You will have to specify the path to the Miles folder. In the case of Apex Legends, the path from MSD inside the Apex Legends folder to the Miles folder would be 
+
+```
+.\audio\ship
+```
 
 ```
 Code:
