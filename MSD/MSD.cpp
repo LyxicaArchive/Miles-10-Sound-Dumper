@@ -79,6 +79,7 @@ void _Record(Project project) {
 	}
 }
 void _Play(Project project) {
+	std::string input;
 	int i;
 	while (true) {
 		while (recorder->Active()) {
@@ -87,16 +88,27 @@ void _Play(Project project) {
 				break;
 			}
 		}
-		 
-		std::cout << "Play Event ID: ";
-		std::cin >> i;
+		
+		while (true) 
+		{
+			std::cout << "Play Event ID: ";
+			std::cin >> input;
+			if (cstrIsDigits(input.c_str()))
+			{
+				i = atoi(input.c_str());
+				break;
+			}
+			else {
+				std::cout << "Invalid event ID. Expected number between 0 and " << events << std::endl;
+			}
+		}
 
 		if (i < 0) {
 			StopPlaying(project.queue);
 			continue;
 		}
 		if (i >= events) {
-			std::cout << "Invalid event ID" << std::endl;
+			std::cout << "Invalid event ID. Expected number between 0 and " << events << std::endl;
 			continue;
 		}
 
@@ -110,7 +122,7 @@ void _Play(Project project) {
 		MilesQueueSubmit(project.queue);
 	}
 }
-bool cstrIsDigits(char* string)
+bool cstrIsDigits(const char* string)
 {
 	int x = 0;
 	auto len = strlen(string);
