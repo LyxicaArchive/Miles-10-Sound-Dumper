@@ -7,7 +7,8 @@ Code:
 MSD                                     -- Open MSD to play sounds
 MSD <EventID>                           -- Dump an event ID
 MSD <EventIDStart> <EventIDEnd>         -- Dump a range of sounds, inclusive
-MSD -l                                  -- Display list of all event IDs and names contained in audio files```
+MSD -l                                  -- Display list of all event IDs and names contained in audio files
+```
 
 
 Issues:
