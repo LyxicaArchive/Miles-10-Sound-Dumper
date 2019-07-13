@@ -7,6 +7,8 @@ In order to use the sound dumper, you'll have to place it inside the Apex Legend
 .\audio\ship
 ```
 
+The syntax for command line operation is 
+
 ```
 Code:
 MSD <Path to Miles folder>                                 -- Open MSD to play sounds
