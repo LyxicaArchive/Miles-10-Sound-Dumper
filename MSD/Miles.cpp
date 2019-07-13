@@ -129,14 +129,14 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bo
 	std::string localized;
 	GetMatchingFile(std::regex("general\\.mbnk$"), &mbnk, dir_path);
 	GetMatchingFile(std::regex("general_stream\\.mstr"), &general, dir_path);
-	GetMatchingFile(std::regex("general_\\w*\\.mstr"), &localized, dir_path);
+	GetMatchingFile(std::regex("general_((?!stream)\\w)*\\.mstr"), &localized, dir_path);
 	project.bank = MilesBankLoad(project.driver, mbnk.c_str(), general.c_str(), localized.c_str(), 0);
 
 	if (IsPatched(dir_path)) {
 		std::string general_patch;
 		std::string localized_patch;
 		GetMatchingFile(std::regex("general_stream_patch_\\d\\.mstr"), &general_patch, dir_path);
-		GetMatchingFile(std::regex("general_\\w*_patch_\\d\\.mstr"), &localized_patch, dir_path);
+		GetMatchingFile(std::regex("general_((?!stream)\\w)*\\_patch_\\d\\.mstr"), &localized_patch, dir_path);
 		MilesBankPatch(project.bank, general_patch.c_str(), localized_patch.c_str());
 	}
 
