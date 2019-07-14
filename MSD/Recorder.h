@@ -25,7 +25,7 @@ private:
 	DWORD timeLastNonSilentSample; // Timestamp of the last received audio buffer frame that contains audio (ie not full of 0s)
 	bool firstSampleReceived;
 
-	static bool IsDataSilent(byte* buffer, int size);
+	static bool IsDataSilent(unsigned short* buffer, int size);
 	void Reset();
 };
 

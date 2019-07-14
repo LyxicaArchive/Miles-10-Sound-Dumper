@@ -3,9 +3,9 @@
 #include "Miles.h"
 #include <iostream>
 
-bool Recorder::IsDataSilent(byte* buffer, int size) {
-	for (int i = 0; i < size; i++) {
-		if (buffer[i] != 0) { return false; }
+bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
+	for (int i = 0; i < size/2; i++) { // size is bytes
+		if (buffer[i] >= 0x2000) { return false; } // Samples are stored BIG-ENDIAN, this seems like a decent noise floor
 	}
 
 	return true;
@@ -59,7 +59,7 @@ void Recorder::Append(PVOID buffer, unsigned int length)
 	// Audio recording just started, and the event starts with silence. After enough continuous silence, kill it. (Event with no audio)
 	// Audio recording has been in progress, and we just received a silent sample. After enough continuous silence, kill it. (End of event)
 	// Audio recording has been in progress, no silence. 
-	auto isSilent = IsDataSilent((byte*)buffer, length);
+	auto isSilent = IsDataSilent((unsigned short*)buffer, length);
 	if (!firstSampleReceived && !isSilent) { firstSampleReceived = true; }
 	if (isSilent)
 	{
