@@ -3,9 +3,11 @@
 #include "Miles.h"
 #include <iostream>
 #include "args.hxx"
+#include <filesystem>
 
 extern args::ValueFlag<int> noiseFloor;
 extern args::Flag muteSound;
+extern args::ValueFlag<std::string> outputFolder;
 
 bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
 	for (int i = 0; i < size/2; i++) { // size is bytes
@@ -17,6 +19,7 @@ bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
 
 Recorder::Recorder(Bank bank) : bank(bank)
 {
+	std::filesystem::create_directories(std::filesystem::path(args::get(outputFolder)));
 	Reset();
 }
 
@@ -27,7 +30,7 @@ bool Recorder::Save()
 	FILE* file;
 
 	MilesFillWavHeader(&headerData, 48000, 2, cursor);
-	snprintf(filename, 256, "%s.wav", eventName);
+	snprintf(filename, 256, "%s\\%s.wav", args::get(outputFolder).c_str(), eventName);
 
 	fopen_s(&file, filename, "wb");
 	if (file == NULL) { return false; }
