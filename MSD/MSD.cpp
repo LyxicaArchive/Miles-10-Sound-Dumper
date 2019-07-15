@@ -26,6 +26,7 @@ args::Group advancedGroup(parser, "ADVANCED");
 args::ValueFlag<int> noiseFloor(advancedGroup, "0x2000", "Adjust the noise floor when detecting silence. Any samples below this value will be considered silent.", { "noise" }, 0x2000);
 args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help" });
 std::vector<int> queuedEvents;
+Project project;
 
 int events;
 struct {
@@ -71,9 +72,6 @@ void _Record(Project project) {
 		MilesQueueSubmit(project.queue);
 
 		while (recorder->Active()) {
-			if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
-				StopPlaying(project.queue);
-			}
 			Sleep(25);
 		}
 		queuedEvents.pop_back();
@@ -164,7 +162,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	Project project = SetupMiles(&logM, args::get(audioFolder), listBankEvents);
+	project = SetupMiles(&logM, args::get(audioFolder), listBankEvents);
 	recorder = new Recorder(project.bank);
 	events = MilesBankGetEventCount(project.bank);
 

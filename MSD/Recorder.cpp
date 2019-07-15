@@ -8,6 +8,8 @@
 extern args::ValueFlag<int> noiseFloor;
 extern args::Flag muteSound;
 extern args::ValueFlag<std::string> outputFolder;
+extern void StopPlaying(Queue queue);
+extern Project project;
 
 bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
 	for (int i = 0; i < size/2; i++) { // size is bytes
@@ -62,6 +64,12 @@ char* Recorder::GetName()
 
 void Recorder::Append(PVOID buffer, unsigned int length)
 {
+	if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) 
+	{
+		StopPlaying(project.queue);
+		Save();
+		return;
+	}
 	/// Three situations:
 	// Audio recording just started, and the event starts with silence. After enough continuous silence, kill it. (Event with no audio)
 	// Audio recording has been in progress, and we just received a silent sample. After enough continuous silence, kill it. (End of event)
