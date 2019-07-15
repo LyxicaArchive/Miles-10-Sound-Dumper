@@ -14,14 +14,20 @@
 #include "hooks.h"
 #include "Recorder.h"
 #include <filesystem>
-bool EXPORT_EVENT_NAMES = false;
-bool RECORDING_SESSION = false;
+#include "args.hxx"	
+
+args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta3");
+args::ValueFlag<std::string> audioFolder(parser, "/audio/ship", "Folder containing Miles audio files (mprj, mbnk, mstr)", { "folder" }, { "./audio/ship" });
+args::Flag listBankEvents(parser, "EVENTLIST", "List all event IDs and names contained in the Mile's bank", { 'l', "list" });
+args::PositionalList<int> eventIDs(parser, "EVENT IDs", "Enter either one or two event IDs. Entering only one will cause that event to be recorded. Entering two event IDs will record every event between the two event IDs.");
+args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help" });
+std::vector<int> queuedEvents;
+
 int events;
 struct {
 	int fielda;
 	int fieldb;
 } out;
-std::vector<int> queuedEvents;
 
 Recorder* recorder = 0;
 byte* buffer_addr;
@@ -138,67 +144,34 @@ bool cstrIsDigits(const char* string)
 	return true;
 }
 int main(int argc, char* argv[])
-{
-	switch (argc)
+{	
+	try
 	{
-	case 1:
-		std::cout << "Missing path to Miles data folder! Correct Syntax is MSD <path to data> [args]." << std::endl;
-		std::cout << "Example with executable in Apex Legends root: MSD ./audio/ship [args]" << std::endl;
-	case 2:
-		RECORDING_SESSION = false;
-		break;
-	case 3:
-		if (strcmp(argv[2], "-l") == 0)
-		{
-			EXPORT_EVENT_NAMES = true;
-		}
-		else
-		{
-			if (!cstrIsDigits(argv[2]))
-			{
-				std::cout << "Event ID passed contained invalid characters" << std::endl;
-				PrintHelp();
-				return 1;
-			}
-			queuedEvents.push_back(atoi(argv[1]));
-			RECORDING_SESSION = true;
-		}
-		break;
-	case 4: 
-		if (!cstrIsDigits(argv[2]))
-		{
-			std::cout << "First event ID passed contained invalid characters" << std::endl;
-			PrintHelp();
-			return 1;
-		}
-		if (!cstrIsDigits(argv[3]))
-		{
-			std::cout << "Second event ID passed contained invalid characters" << std::endl;
-			PrintHelp();
-			return 1;
-		}
-		for (int i = atoi(argv[2]); i <= atoi(argv[3]); i++) {
-			queuedEvents.push_back(i);
-		}
-		RECORDING_SESSION = true;
-		break;
-	default:
-		PrintHelp();
-		return 1;
+		parser.ParseCLI(argc, argv);
 	}
-	if (!std::filesystem::exists(std::filesystem::path(argv[1])))
+	catch (args::Help)
 	{
-		std::cout << "Couldn't find target folder. Did you enter the path correctly? ";
-		std::cout << "If you're entering an abbreviated path ensure that you're specifying folder root. ";
-		std::cout << "Example path from top level game directory to data would be ./audio/ship" << std::endl;
+		std::cout << parser;
+		return 0;
+	}
+	catch (args::ParseError e)
+	{
+		std::cerr << e.what() << std::endl;
+		std::cerr << parser;
 		return 1;
 	}
 
-	Project project = SetupMiles(&logM, argv[1], EXPORT_EVENT_NAMES);
+	if (!std::filesystem::exists(std::filesystem::path(args::get(audioFolder))))
+	{
+		std::cout << "Folder " << args::get(audioFolder) << " not found" << std::endl;
+		return 1;
+	}
+
+	Project project = SetupMiles(&logM, args::get(audioFolder), listBankEvents);
 	recorder = new Recorder(project.bank);
-
 	events = MilesBankGetEventCount(project.bank);
-	if (EXPORT_EVENT_NAMES) {
+
+	if (listBankEvents) {
 		auto names = GetEventNames(project.bank);
 		for (const auto& name : names) {
 			std::cout << name;
@@ -206,14 +179,31 @@ int main(int argc, char* argv[])
 
 		return 1;
 	}
-	if (RECORDING_SESSION)
+
+	auto ids = args::get(eventIDs);
+	if (ids.size() > 2)
 	{
+		std::cout << "Two is the maximum number of event IDs that can be entered." << std::endl;
+	}
+
+	if (ids.size() > 0) 
+	{
+		auto ids = args::get(eventIDs);
+		if (ids.size() == 1)
+		{
+			queuedEvents.push_back(ids[0]);
+		}
+		else
+		{
+			for (int i = ids[0]; i <= ids[1]; i++) {
+				queuedEvents.push_back(i);
+			}
+		}
 		SetupHooks(project.driver, &hook_GET_AUDIO_BUFFER_AND_SET_SIZE, &hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER);
 		_Record(project);
 	}
-	else {
+	else 
+	{
 		_Play(project);
 	}
-	
-	return 0;
 }
