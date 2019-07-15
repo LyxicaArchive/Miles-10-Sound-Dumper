@@ -80,7 +80,7 @@ void Recorder::Append(PVOID buffer, unsigned int length)
 		} 
 		else
 		{
-			if (timeGetTime() - timeLastNonSilentSample > 3000)
+			if (timeGetTime() - timeLastNonSilentSample > 750)
 			{
 				Save();
 				return;
