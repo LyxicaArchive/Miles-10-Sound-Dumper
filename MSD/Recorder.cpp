@@ -32,7 +32,7 @@ bool Recorder::Save()
 	FILE* file;
 
 	MilesFillWavHeader(&headerData, 48000, 2, cursor);
-	snprintf(filename, 256, "%s\\%s.wav", args::get(outputFolder).c_str(), eventName);
+	snprintf(filename, 256, "%s\\%i - %s.wav", args::get(outputFolder).c_str(), eventId, eventName);
 
 	fopen_s(&file, filename, "wb");
 	if (file == NULL) { return false; }
