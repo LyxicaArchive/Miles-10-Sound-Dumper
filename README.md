@@ -30,6 +30,8 @@ OPTIONS:
 
 ```
 
+## Tutorial
+https://www.youtube.com/watch?v=7bW8Fo4gBzw&feature=youtu.be
 
 Issues:
 * Because I'm hooking into calls that fill a DirectSoundBuffer, sound data is gathered in real time. This means that dumping each event requires actually playing it. Dumping the entire event list could take quite a while, and some events don't actually end but rather loop forever (press ESC to stop recording a loop event once you've gathered enough sound data). 
