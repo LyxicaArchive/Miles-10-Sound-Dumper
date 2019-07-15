@@ -2,7 +2,6 @@
 x64
 .git
 *.dll
-*.lib
 *.exp
 *.def
 *.txt
