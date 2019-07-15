@@ -50,14 +50,6 @@ __int64 hook_TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER(__int64* a1) {
 	return hook2(a1);
 }
 
-void PrintHelp() {
-	std::cout << "--------- OPTIONS --------" << std::endl
-				<< "\tMSD <Path to Miles folder> \t\t\t\t\t-- Open MSD to play sounds" << std::endl
-				<< "\tMSD <Path to Miles folder> <EventID>\t\t\t\t-- Dump event ID" << std::endl
-				<< "\tMSD <Path to Miles folder> <EventIDStart> <EventIDEnd>\t\t-- Dump a range of sounds, inclusive" << std::endl
-				<< "\tMSD <Path to Miles folder> -l\t\t\t\t\t-- Display list of all event IDs and names contained in audio files" << std::endl;
-}
-
 void WINAPI logM(int number, char* message)
 {
 	std::cout << "Message received: " << message << "\r\n";
