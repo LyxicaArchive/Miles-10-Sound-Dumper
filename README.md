@@ -1,20 +1,33 @@
 # Miles-10-Sound-Dumper
 Greetings, I've now finished the first beta version of my miles 10 sound dumper. I think I have most bugs ironed out, but obviously please let me know if something is broken. 
 
-In order to use the sound dumper, you'll have to place it inside the Apex Legends folder, right where r5apex.exe is. Then using the command line you can play any sound (as far as I know) and dump them. You will have to specify the path to the Miles folder. In the case of Apex Legends, the path from MSD inside the Apex Legends folder to the Miles folder would be 
-
-```
-.\audio\ship
-```
+In order to use the sound dumper, you'll have to place it inside the Apex Legends folder, right where r5apex.exe is. Then using the command line you can play any sound (as far as I know) and dump them. 
 
 The syntax for command line operation is 
 
 ```
-Code:
-MSD <Path to Miles folder>                                 -- Open MSD to play sounds
-MSD <Path to Miles folder> <EventID>                       -- Dump an event ID
-MSD <Path to Miles folder> <EventIDStart> <EventIDEnd>     -- Dump a range of sounds, inclusive
-MSD <Path to Miles folder> -l                              -- Display list of all event IDs and names contained in audio files
+OPTIONS:
+
+      --folder=[/audio/ship]            Folder containing Miles audio files
+                                        (mprj, mbnk, mstr)
+      -o[/miles_audio],
+      --out=[/miles_audio]              Folder to place the audio files in
+      -l, --list                        List all event IDs and names contained
+                                        in the Mile's bank
+      -m, --mute                        Mute audio while recording events
+      EVENT IDs...                      Enter either one or two event IDs.
+                                        Entering only one will cause that event
+                                        to be recorded. Entering two event IDs
+                                        will record every event between the two
+                                        event IDs.
+      ADVANCED
+        --noise=[0x2000]                  Adjust the noise floor when detecting
+                                          silence. Any samples below this value
+                                          will be considered silent.
+      -h, --help                        Display this help menu
+      "--" can be used to terminate flag options and force all following
+      arguments to be treated as positional options
+
 ```
 
 
