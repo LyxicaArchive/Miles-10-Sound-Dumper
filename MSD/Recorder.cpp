@@ -2,10 +2,13 @@
 #include "Recorder.h"
 #include "Miles.h"
 #include <iostream>
+#include "args.hxx"
+
+extern args::ValueFlag<int> noiseFloor;
 
 bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
 	for (int i = 0; i < size/2; i++) { // size is bytes
-		if (buffer[i] >= 0x2000) { return false; } // Samples are stored BIG-ENDIAN, this seems like a decent noise floor
+		if (buffer[i] >= args::get(noiseFloor)) { return false; } // Samples are stored BIG-ENDIAN, this seems like a decent noise floor
 	}
 
 	return true;
