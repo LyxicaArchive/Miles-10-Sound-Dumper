@@ -5,6 +5,7 @@
 #include "args.hxx"
 
 extern args::ValueFlag<int> noiseFloor;
+extern args::Flag muteSound;
 
 bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
 	for (int i = 0; i < size/2; i++) { // size is bytes
@@ -90,6 +91,10 @@ void Recorder::Append(PVOID buffer, unsigned int length)
 	}
 	memcpy(data + cursor, buffer, length);
 	cursor += length;
+	if (muteSound) 
+	{
+		memset(buffer, 0, length);
+	}
 }
 
 bool Recorder::Active()
