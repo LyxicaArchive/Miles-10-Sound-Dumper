@@ -6,14 +6,18 @@ In order to use the sound dumper, you'll have to place it inside the Apex Legend
 The syntax for command line operation is 
 
 ```
-OPTIONS:
+  msd [EVENT IDs...] {OPTIONS}
+
+    Miles 10 Sound Dumper by Lyxica v1.0-beta5
+
+  OPTIONS:
 
       --folder=[/audio/ship]            Folder containing Miles audio files
-                                        (mprj, mbnk, mstr)
+                                        (mprj, mbnk, mstr).
       -o[/miles_audio],
-      --out=[/miles_audio]              Folder to place the audio files in
+      --out=[/miles_audio]              Folder to place the audio files in.
       -l, --list                        List all event IDs and names contained
-                                        in the Mile's bank
+                                        in the Mile's bank.
       -m, --mute                        Mute audio while recording events
       EVENT IDs...                      Enter either one or two event IDs.
                                         Entering only one will cause that event
@@ -24,10 +28,15 @@ OPTIONS:
         --noise=[0x2000]                  Adjust the noise floor when detecting
                                           silence. Any samples below this value
                                           will be considered silent.
+        --start=[1250]                    When beginning an event recording, the
+                                          amount of milliseconds of silence to
+                                          wait for audio before giving up.
+        --end=[500]                       After an event has started recording,
+                                          the amount of milliseconds of silence
+                                          to wait before stopping the recording.
       -h, --help                        Display this help menu
       "--" can be used to terminate flag options and force all following
       arguments to be treated as positional options
-
 ```
 
 ## Tutorial
