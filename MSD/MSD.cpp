@@ -16,14 +16,16 @@
 #include <filesystem>
 #include "args.hxx"	
 
-args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta4");
-args::ValueFlag<std::string> audioFolder(parser, "/audio/ship", "Folder containing Miles audio files (mprj, mbnk, mstr)", { "folder" }, { "./audio/ship" });
-args::ValueFlag<std::string> outputFolder(parser, "/miles_audio", "Folder to place the audio files in", { 'o', "out" }, { "./miles_audio" });
-args::Flag listBankEvents(parser, "EVENTLIST", "List all event IDs and names contained in the Mile's bank", { 'l', "list" });
+args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta5");
+args::ValueFlag<std::string> audioFolder(parser, "/audio/ship", "Folder containing Miles audio files (mprj, mbnk, mstr).", { "folder" }, { "./audio/ship" });
+args::ValueFlag<std::string> outputFolder(parser, "/miles_audio", "Folder to place the audio files in.", { 'o', "out" }, { "./miles_audio" });
+args::Flag listBankEvents(parser, "EVENTLIST", "List all event IDs and names contained in the Mile's bank.", { 'l', "list" });
 args::Flag muteSound(parser, "QUIET", "Mute audio while recording events", { 'm', "mute" });
 args::PositionalList<int> eventIDs(parser, "EVENT IDs", "Enter either one or two event IDs. Entering only one will cause that event to be recorded. Entering two event IDs will record every event between the two event IDs.");
 args::Group advancedGroup(parser, "ADVANCED");
 args::ValueFlag<int> noiseFloor(advancedGroup, "0x2000", "Adjust the noise floor when detecting silence. Any samples below this value will be considered silent.", { "noise" }, 0x2000);
+args::ValueFlag<int> beginningSilencePeriod(advancedGroup, "1250", "When beginning an event recording, the amount of milliseconds of silence to wait for audio before giving up.", { "start" }, 1250);
+args::ValueFlag<int> endingSilencePeriod(advancedGroup, "500", "After an event has started recording, the amount of milliseconds of silence to wait before stopping the recording.", { "end" }, 500);
 args::HelpFlag help(parser, "help", "Display this help menu", { 'h', "help" });
 std::vector<int> queuedEvents;
 Project project;

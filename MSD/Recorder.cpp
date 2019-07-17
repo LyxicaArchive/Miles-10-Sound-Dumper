@@ -10,6 +10,9 @@ extern args::Flag muteSound;
 extern args::ValueFlag<std::string> outputFolder;
 extern void StopPlaying(Queue queue);
 extern Project project;
+extern args::ValueFlag<int> beginningSilencePeriod;
+extern args::ValueFlag<int> endingSilencePeriod;
+
 
 bool Recorder::IsDataSilent(unsigned short* buffer, int size) {
 	for (int i = 0; i < size/2; i++) { // size is bytes
@@ -80,7 +83,7 @@ void Recorder::Append(PVOID buffer, unsigned int length)
 	{
 		if (firstSampleReceived) 
 		{
-			if (timeGetTime() - timeLastNonSilentSample > 250)
+			if (timeGetTime() - timeLastNonSilentSample > args::get(endingSilencePeriod))
 			{
 				Save();
 				return;
@@ -88,7 +91,7 @@ void Recorder::Append(PVOID buffer, unsigned int length)
 		} 
 		else
 		{
-			if (timeGetTime() - timeLastNonSilentSample > 750)
+			if (timeGetTime() - timeLastNonSilentSample > args::get(beginningSilencePeriod))
 			{
 				Save();
 				return;
