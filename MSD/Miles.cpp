@@ -166,6 +166,11 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bo
 		MilesBankPatch(project.bank, general_patch.c_str(), localized_patch.c_str());
 	}
 
+	if (patch_count > 0)
+	{
+		MilesBankCommitPatches(project.bank);
+	}
+
 	int bank_status = MilesBankGetStatus(project.bank, 0);
 	while (bank_status == 0) {
 		bank_status = MilesBankGetStatus(project.bank, 0);
