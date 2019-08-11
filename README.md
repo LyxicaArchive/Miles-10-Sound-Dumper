@@ -1,50 +1,8 @@
 # Miles-10-Sound-Dumper
-Greetings, I've now finished the first beta version of my miles 10 sound dumper. I think I have most bugs ironed out, but obviously please let me know if something is broken. 
 
-In order to use the sound dumper, you'll have to place it inside the Apex Legends folder, right where r5apex.exe is. Then using the command line you can play any sound (as far as I know) and dump them. 
+This is the Titanfall 2 version of the Miles Sound Dumper. MSD_TF2 must be placed inside the \Titanfall2\bin\x64_retail folder to run.
 
-The syntax for command line operation is 
-
-```
-  msd [EVENT IDs...] {OPTIONS}
-
-    Miles 10 Sound Dumper by Lyxica v1.0-beta5
-
-  OPTIONS:
-
-      --folder=[/audio/ship]            Folder containing Miles audio files
-                                        (mprj, mbnk, mstr).
-      -o[/miles_audio],
-      --out=[/miles_audio]              Folder to place the audio files in.
-      -l, --list                        List all event IDs and names contained
-                                        in the Mile's bank.
-      -m, --mute                        Mute audio while recording events
-      EVENT IDs...                      Enter either one or two event IDs.
-                                        Entering only one will cause that event
-                                        to be recorded. Entering two event IDs
-                                        will record every event between the two
-                                        event IDs.
-      ADVANCED
-        --noise=[0x2000]                  Adjust the noise floor when detecting
-                                          silence. Any samples below this value
-                                          will be considered silent.
-        --start=[1250]                    When beginning an event recording, the
-                                          amount of milliseconds of silence to
-                                          wait for audio before giving up.
-        --end=[500]                       After an event has started recording,
-                                          the amount of milliseconds of silence
-                                          to wait before stopping the recording.
-      -h, --help                        Display this help menu
-      "--" can be used to terminate flag options and force all following
-      arguments to be treated as positional options
-```
+`MSD_TF2.exe /h` to display the help screen.
 
 ## Tutorial
 https://www.youtube.com/watch?v=7bW8Fo4gBzw&feature=youtu.be
-
-Issues:
-* Because I'm hooking into calls that fill a DirectSoundBuffer, sound data is gathered in real time. This means that dumping each event requires actually playing it. Dumping the entire event list could take quite a while, and some events don't actually end but rather loop forever (press ESC to stop recording a loop event once you've gathered enough sound data). 
-* Events can be composed of multiple different source material sounds that are chosen at random. For example, a taunt event might have three different voice lines but only one of them will be dumped when you request it. I don't know at the moment how to detect multiple samples, or how to select a specific one. Just something to keep in mind. 
-
-Misc:
-* I think every event is playable now, but some events that are listed don't have data (eg most titanfall 2 sound events).
