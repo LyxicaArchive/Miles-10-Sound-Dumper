@@ -66,7 +66,6 @@ void _Record(Project project) {
 		std::cout << "Recording " << recorder->GetName() << std::endl;
 
 		MilesBankGetEventTemplateId(project.bank, queuedEvents.back(), (long long*)& out);
-		MilesQueueEventVolume(project.queue, 1);
 		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
 		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
 		MilesQueueControllerValue(project.queue, "LobbyMusicVolume", 1);
@@ -118,7 +117,6 @@ void _Play(Project project) {
 
 		std::cout << "Playing " << MilesBankGetEventName(project.bank, i) << " (enter negative number to stop)" << std::endl;
 		MilesBankGetEventTemplateId(project.bank, i, (long long*)& out);
-		MilesQueueEventVolume(project.queue, 1);
 		MilesQueueControllerValue(project.queue, "GameMusicVolume", 1);
 		MilesQueueControllerValue(project.queue, "DialogueVolume", 1);
 		MilesQueueControllerValue(project.queue, "LobbyMusicVolume", 1);
