@@ -7,8 +7,8 @@ TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER hook2;
 
 void SetupHooks(PVOID driver, GET_AUDIO_BUFFER_AND_SET_SIZE callback1, TRANSFER_MIXED_AUDIO_TO_SOUND_BUFFER callback2)
 {
-	byte* DS_CONTAINER = (byte*)driver + 0x28;
-	byte* DIRECTSOUNDCOM = (byte*) * (__int64**)(DS_CONTAINER + 0x20);
+	byte* DS_CONTAINER = (byte*)driver + 0x20;
+	byte* DIRECTSOUNDCOM = (byte*) * (__int64**)(DS_CONTAINER + 0x40);
 
 	hook1 = *(GET_AUDIO_BUFFER_AND_SET_SIZE*)(DIRECTSOUNDCOM + 0x30);
 	*(GET_AUDIO_BUFFER_AND_SET_SIZE*)(DIRECTSOUNDCOM + 0x30) = callback1;
