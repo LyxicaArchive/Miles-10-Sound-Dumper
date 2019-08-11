@@ -2,8 +2,6 @@
 x64
 .git
 *.dll
-*.exp
-*.def
 *.txt
 *.wav
 *.vcxproj.filters
