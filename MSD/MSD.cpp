@@ -2,9 +2,12 @@
 //
 
 #include "stdafx.h"
+#include "args.hxx"	
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
+#include <signal.h>
 #include <Windows.h>
 #include <vector>
 #include <iomanip>
@@ -14,7 +17,6 @@
 #include "hooks.h"
 #include "Recorder.h"
 #include <filesystem>
-#include "args.hxx"	
 
 args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta5");
 args::ValueFlag<std::string> audioFolder(parser, "/audio/ship", "Folder containing Miles audio files (mprj, mbnk, mstr).", { "folder" }, { "./audio/ship" });
@@ -39,6 +41,16 @@ struct {
 Recorder* recorder = 0;
 byte* buffer_addr;
 int write_size;
+
+void signal_callback_handler(int signum) {
+	//Catch keyboard interrupt and save current sound data to disk
+	if(recorder->Active())
+	{
+		std::cout << "Saving buffer to disk." << std::endl;
+		recorder->Save();
+	}
+	exit(signum);
+}
 
 __int64 hook_GET_AUDIO_BUFFER_AND_SET_SIZE(__int64* a1, byte** BUFFER, int size) {
 	write_size = size;
@@ -146,6 +158,7 @@ bool cstrIsDigits(const char* string)
 }
 int main(int argc, char* argv[])
 {	
+	signal(SIGINT, signal_callback_handler);
 	try
 	{
 		parser.ParseCLI(argc, argv);
