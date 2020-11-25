@@ -18,6 +18,9 @@ The syntax for command line operation is
       --out=[/miles_audio]              Folder to place the audio files in.
       -l, --list                        List all event IDs and names contained
                                         in the Mile's bank.
+      -c, --clist                       Print to file all event names contained 
+                                        in the	Mile's bank with no IDs for a 
+                                        more convenient version comparison.
       -m, --mute                        Mute audio while recording events
       EVENT IDs...                      Enter either one or two event IDs.
                                         Entering only one will cause that event

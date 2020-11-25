@@ -66,6 +66,7 @@ struct Project {
 
 void SetupBusVolumes(Driver driver);
 std::vector<std::string> GetEventNames(Bank bank);
+std::vector<std::string> GetComparableEventNames(Bank bank);
 Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bool silent);
 void StopPlaying(Queue queue);
 

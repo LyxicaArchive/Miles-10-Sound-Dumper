@@ -22,6 +22,7 @@ args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta5");
 args::ValueFlag<std::string> audioFolder(parser, "/audio/ship", "Folder containing Miles audio files (mprj, mbnk, mstr).", { "folder" }, { "./audio/ship" });
 args::ValueFlag<std::string> outputFolder(parser, "/miles_audio", "Folder to place the audio files in.", { 'o', "out" }, { "./miles_audio" });
 args::Flag listBankEvents(parser, "EVENTLIST", "List all event IDs and names contained in the Mile's bank.", { 'l', "list" });
+args::Flag listComparableBankEvents(parser, "EVENTLIST", "List all event names contained in the Mile's bank with no IDs for a more convenient file comparison.", { 'c', "clist" });
 args::Flag muteSound(parser, "QUIET", "Mute audio while recording events", { 'm', "mute" });
 args::PositionalList<int> eventIDs(parser, "EVENT IDs", "Enter either one or two event IDs. Entering only one will cause that event to be recorded. Entering two event IDs will record every event between the two event IDs.");
 args::Group advancedGroup(parser, "ADVANCED");
@@ -181,7 +182,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	project = SetupMiles(&logM, args::get(audioFolder), listBankEvents);
+	project = SetupMiles(&logM, args::get(audioFolder), listBankEvents || listComparableBankEvents);
 	recorder = new Recorder(project.bank);
 	events = MilesBankGetEventCount(project.bank);
 
@@ -193,7 +194,15 @@ int main(int argc, char* argv[])
 
 		return 1;
 	}
-
+	if (listComparableBankEvents) {
+		auto names = GetComparableEventNames(project.bank);
+		std::ofstream out("audio_comp.txt", std::ios_base::out);
+		for (const auto& name : names) {
+			out << name;
+		}
+		out.close();
+		return 1;
+	}
 	auto ids = args::get(eventIDs);
 	if (ids.size() > 2)
 	{

@@ -26,6 +26,18 @@ std::vector<std::string> GetEventNames(Bank bank)
 	return collectedNames;
 }
 
+std::vector<std::string> GetComparableEventNames(Bank bank)
+{
+	std::vector<std::string> collectedNames;
+	for (int i = 0; i < MilesBankGetEventCount(bank); i++) {
+		std::stringstream line;
+		line << MilesBankGetEventName(bank, i) << std::endl;
+		collectedNames.push_back(line.str());
+	}
+
+	return collectedNames;
+}
+
 bool GetMatchingFile(std::regex reg, std::string* out, std::string dir_path)
 {
 	for (const auto& entry : fs::directory_iterator(fs::path(dir_path)))
