@@ -44,12 +44,12 @@ bool GetMatchingFile(std::regex reg, std::string* out, std::string dir_path)
 
 bool GetLocalizedLanguage(std::string* out, std::string dir_path)
 {
-	auto reg = std::regex("general_(\\w*).mstr");
+	auto reg = std::regex("general_(\\w*)_patch_.*.mstr");
 	for (const auto& entry : fs::directory_iterator(fs::path(dir_path)))
 	{
 		std::smatch languageMatch;
 		std::string path = entry.path().string();
-		if (std::regex_search(path, languageMatch, reg))
+		if (std::regex_search(path, languageMatch, reg) && languageMatch[1].str()!="stream")
 		{
 			*out = languageMatch[1].str();
 			return true;
@@ -98,7 +98,6 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bo
 	}
 
 	auto output = MilesOutputDirectSound();
-
 	unk a1;
 	a1.sound_function = (long long*)output;
 	a1.endpointID = NULL; // Default audio Device 
