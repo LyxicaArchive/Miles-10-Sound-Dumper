@@ -109,7 +109,11 @@ void GetChosenLanguage(std::string* language,std::vector<std::string>* found_lan
 			break;
 		}
 		else if (key == 9) {
-			std::cout << std::string((*found_language)[index].length(), '\b');
+			for (int i = 0; i < (*found_language)[index].length(); i++) {
+				std::cout << "\b";
+				std::cout << " ";
+				std::cout << "\b";
+			}
 			if (index < ((*found_language).size() - 1)) {
 				index++;
 			}
