@@ -4,8 +4,12 @@
 #include <iostream>
 #include <filesystem>
 #include <regex>
+#include <conio.h>
+#include "args.hxx"
 
 namespace fs = std::filesystem;
+
+extern args::ValueFlag<std::string> exportLanguage;
 
 void SetupBusVolumes(Driver driver)
 {
@@ -42,7 +46,7 @@ bool GetMatchingFile(std::regex reg, std::string* out, std::string dir_path)
 	return false;
 }
 
-bool GetLocalizedLanguage(std::string* out, std::string dir_path)
+bool GetLocalizedLanguage(std::vector<std::string> *out, std::string dir_path)
 {
 	auto reg = std::regex("general_(\\w*)_patch_.*.mstr");
 	for (const auto& entry : fs::directory_iterator(fs::path(dir_path)))
@@ -51,11 +55,16 @@ bool GetLocalizedLanguage(std::string* out, std::string dir_path)
 		std::string path = entry.path().string();
 		if (std::regex_search(path, languageMatch, reg) && languageMatch[1].str()!="stream")
 		{
-			*out = languageMatch[1].str();
-			return true;
+			auto in = std::find((*out).begin(), (*out).end(), languageMatch[1].str());
+			if (in == (*out).end()) {
+				(*out).push_back(languageMatch[1].str());
+			}
 		}
 	}
-	return false;
+	if ((*out).size())
+		return true;
+	else
+		return false;
 }
 
 unsigned int GetPatchCount(std::string dir_path)
@@ -81,6 +90,40 @@ unsigned int GetPatchCount(std::string dir_path)
 bool IsPatched(std::string dir_path)
 {
 	return GetMatchingFile(std::regex("_patch_"), 0, dir_path);
+}
+
+void GetChosenLanguage(std::string* language,std::vector<std::string>* found_language) {
+	std::string text;
+	for (int i = 0; i < (*found_language).size(); i++) {
+		text += (*found_language)[i] + " ";
+	}
+	std::cout << "Found those Language: " + text << std::endl;
+	std::cout << "Choose Language which you want to export(use Tab key to switch): " + (*found_language)[0];
+	int key = _getch();
+	int index = 0;
+	while (true)
+	{
+		if (key == 13) {
+			*language = (*found_language)[index];
+			std::cout << std::endl;
+			break;
+		}
+		else if (key == 9) {
+			std::cout << std::string((*found_language)[index].length(), '\b');
+			if (index < ((*found_language).size() - 1)) {
+				index++;
+			}
+			else {
+				index = 0;
+			}
+			std::cout << (*found_language)[index];
+			key = _getch();
+		}
+		else
+		{
+			key = _getch();
+		}
+	};
 }
 
 
@@ -112,9 +155,33 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bo
 	MilesEventInfoQueueEnable(project.driver);
 
 	std::string mprj;
+	std::vector<std::string> found_language;
 	std::string language;
 	GetMatchingFile(std::regex(".mprj$"), &mprj, dir_path);
-	GetLocalizedLanguage(&language, dir_path);
+	GetLocalizedLanguage(&found_language, dir_path);
+	if (found_language.empty()) {
+		std::cout << "Can't found language file!" << std::endl;
+		std::cout << "Press any key to exit!" << std::endl;
+		int temp = _getch();
+		exit(0);
+	}
+	if(args::get(exportLanguage).empty()) {
+		language = found_language[0];
+		if ( found_language.size() != 1 && !silent ) {
+			GetChosenLanguage(&language, &found_language);
+		}
+	}
+	else {
+		std::string mlanguage = args::get(exportLanguage).c_str();
+		auto in = std::find(found_language.begin(), found_language.end(), mlanguage);
+		if (in == found_language.end()) {
+			language = found_language[0];
+		}
+		else {
+			language = mlanguage;
+		}
+	}
+
 
 	std::string project_name = mprj;
 
