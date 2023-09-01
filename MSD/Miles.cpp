@@ -46,6 +46,25 @@ bool GetMatchingFile(std::regex reg, std::string* out, std::string dir_path)
 	return false;
 }
 
+bool GetMatchingLocalizedFile(std::regex reg, std::string* out,std::string language, std::string dir_path)
+{
+	for (const auto& entry : fs::directory_iterator(fs::path(dir_path)))
+	{
+		if (std::regex_search(entry.path().string(), reg))
+		{
+			if (entry.path().string().find(language) == -1) {
+				continue;
+			}
+			if (out)
+			{
+				*out = entry.path().string();
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 bool GetLocalizedLanguage(std::vector<std::string> *out, std::string dir_path)
 {
 	auto reg = std::regex("general_(\\w*)_patch_.*.mstr");
@@ -219,7 +238,7 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bo
 	std::string localized;
 	GetMatchingFile(std::regex("general\\.mbnk$"), &mbnk, dir_path);
 	GetMatchingFile(std::regex("general_stream\\.mstr"), &general, dir_path);
-	GetMatchingFile(std::regex("general_((?!stream)\\w)*\\.mstr"), &localized, dir_path);
+	GetMatchingLocalizedFile(std::regex("general_((?!stream)\\w)*\\.mstr"), &localized, language, dir_path);
 	project.bank = MilesBankLoad(project.driver, mbnk.c_str(), general.c_str(), localized.c_str(), 1, 0);
 	auto patch_count = GetPatchCount(dir_path);
 
@@ -232,7 +251,7 @@ Project SetupMiles(void (WINAPI* callback)(int, char*), std::string dir_path, bo
 		general_patch_str << "general_stream_patch_" << i << "\\.mstr";
 		localized_patch_str << "general_((?!stream)\\w)*\\_patch_" << i << "\\.mstr";
 		GetMatchingFile(std::regex(general_patch_str.str()), &general_patch, dir_path);
-		GetMatchingFile(std::regex(localized_patch_str.str()), &localized_patch, dir_path);
+		GetMatchingLocalizedFile(std::regex(localized_patch_str.str()), &localized_patch, language, dir_path);
 		MilesBankPatch(project.bank, general_patch.c_str(), localized_patch.c_str());
 	}
 
