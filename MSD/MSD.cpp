@@ -16,9 +16,10 @@
 #include <filesystem>
 #include "args.hxx"	
 
-args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta5");
+args::ArgumentParser parser("Miles 10 Sound Dumper by Lyxica v1.0-beta5\nFixed By zxcPandora");
 args::ValueFlag<std::string> audioFolder(parser, "../../r2/sound", "Folder containing Miles audio files (mprj, mbnk, mstr).", { "folder" }, { "../../r2/sound" });
 args::ValueFlag<std::string> outputFolder(parser, "/miles_audio", "Folder to place the audio files in.", { 'o', "out" }, { "./miles_audio" });
+args::ValueFlag<std::string> exportLanguage(parser, "Language", "Language which you want to export\nIf not exist or empty,will choose the first found language.", { 'e', "export" });
 args::Flag listBankEvents(parser, "EVENTLIST", "List all event IDs and names contained in the Mile's bank.", { 'l', "list" });
 args::Flag muteSound(parser, "QUIET", "Mute audio while recording events", { 'm', "mute" });
 args::PositionalList<int> eventIDs(parser, "EVENT IDs", "Enter either one or two event IDs. Entering only one will cause that event to be recorded. Entering two event IDs will record every event between the two event IDs.");
