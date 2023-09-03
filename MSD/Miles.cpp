@@ -117,7 +117,7 @@ void GetChosenLanguage(std::string* language,std::vector<std::string>* found_lan
 		text += (*found_language)[i] + " ";
 	}
 	std::cout << "Found those Language: " + text << std::endl;
-	std::cout << "Choose Language which you want to export(use Tab key to switch): " + (*found_language)[0];
+	std::cout << "Choose Language which you want to export(use the \"TAB\" key in the keyborad to switch): " + (*found_language)[0];
 	int key = _getch();
 	int index = 0;
 	while (true)
